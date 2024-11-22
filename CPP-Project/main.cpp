@@ -8,6 +8,13 @@ int main() {
     sf::Color Green(0, 145, 50);
     sf::Color Yellow(252, 171, 64);
 
+    sf::Texture img;
+    img.loadFromFile("start_cookie.png");
+
+    // 스프라이트 생성
+    sf::Sprite sprite(img);
+    sprite.setPosition(649, 279);
+
     // 폰트
     sf::Font font;
     font.loadFromFile("Pretendard-Bold.otf");
@@ -36,6 +43,7 @@ int main() {
                 window.close();
         }
         window.clear(Green);
+        window.draw(sprite);
         window.draw(text_f);
         window.draw(text_start);
 
