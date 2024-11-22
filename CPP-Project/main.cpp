@@ -20,19 +20,19 @@ int main() {
     font.loadFromFile("Pretendard-Bold.otf");
 
     // 텍스트
-    sf::Text text_f;
-    text_f.setFont(font); // 폰트 설정
-    text_f.setString("Fortune Cookie");
-    text_f.setCharacterSize(100); // 글씨 크기
-    text_f.setFillColor(Yellow);
-    text_f.setPosition(360, 452); // 위치
+    sf::Text title_text;
+    title_text.setFont(font); // 폰트 설정
+    title_text.setString("Fortune Cookie");
+    title_text.setCharacterSize(100); // 글씨 크기
+    title_text.setFillColor(Yellow);
+    title_text.setPosition(360, 452); // 위치
 
-    sf::Text text_start;
-    text_start.setFont(font); // 폰트 설정
-    text_start.setString(L"시작하기");
-    text_start.setCharacterSize(43); // 글씨 크기
-    text_start.setFillColor(Yellow);
-    text_start.setPosition(645, 602); // 위치
+    sf::Text start_btn;
+    start_btn.setFont(font); // 폰트 설정
+    start_btn.setString(L"시작하기");
+    start_btn.setCharacterSize(43); // 글씨 크기
+    start_btn.setFillColor(Yellow);
+    start_btn.setPosition(645, 602); // 위치
 
     // 메인 루프
     while (window.isOpen()) {
@@ -44,8 +44,8 @@ int main() {
         }
         window.clear(Green);
         window.draw(sprite);
-        window.draw(text_f);
-        window.draw(text_start);
+        window.draw(title_text);
+        window.draw(start_btn);
 
         // 화면 출력
         window.display();
