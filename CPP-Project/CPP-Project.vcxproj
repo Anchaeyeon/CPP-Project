@@ -134,6 +134,13 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\Users\user\Downloads\start_cookie.png" />
+    <Image Include="butter.png" />
+    <Image Include="choco.png" />
+    <Image Include="egg.png" />
+    <Image Include="flour.png" />
+    <Image Include="milk.png" />
+    <Image Include="oil.png" />
+    <Image Include="sugar.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
