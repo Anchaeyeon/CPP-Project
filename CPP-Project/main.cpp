@@ -160,6 +160,13 @@ public:
         choco.setCharacterSize(50);
         choco.setFillColor(Yellow);
         choco.setPosition(542, 750);
+
+        // 다음으로 넘어가는 버튼
+        nextBtn.setFont(font);
+        nextBtn.setString("next >");
+        nextBtn.setCharacterSize(43);
+        nextBtn.setFillColor(Yellow);
+        nextBtn.setPosition(1273, 870);
     }
 
     void click(sf::RenderWindow& window, int& currentScreen) override {
@@ -168,12 +175,21 @@ public:
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+            else if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                    if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        currentScreen = 2; // 화면 전환
+                    }
+                }
+            }
         }
     }
 
     void render(sf::RenderWindow& window) override {
         window.clear(Green);
         window.draw(IngredientText);
+        window.draw(nextBtn);
 
         window.draw(flour);
         window.draw(milk);
@@ -195,10 +211,41 @@ public:
     }
 
 private:
-    sf::Text IngredientText;
+    sf::Text IngredientText, nextBtn;
     sf::Text flour, milk, egg, butter, sugar, oil, choco;
     sf::Texture flourImg, milkImg, eggImg, butterImg, sugarImg, oilImg, chocoImg;
     sf::Sprite flourSprite, milkSprite, eggSprite, butterSprite, sugarSprite, oilSprite, chocoSprite;
+};
+
+// 만들어야 할 순서를 보여주는 클래스
+class Order : public Screen {
+public:
+    Order() {
+        // 순서 소개 텍스트
+        orderList.setFont(font);
+        orderList.setString(L"< 당신이 만들어야 할 포춘쿠키 순서 >");
+        orderList.setCharacterSize(50);
+        orderList.setFillColor(Yellow);
+        orderList.setPosition(350, 159);
+    }
+
+    void click(sf::RenderWindow& window, int& currentScreen) override {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
+    }
+
+    void render(sf::RenderWindow& window) override {
+        window.clear(Green);
+        window.draw(orderList);
+        window.display();
+    }
+
+private:
+    sf::Text orderList;
 };
 
 // 메인 클래스
@@ -207,6 +254,7 @@ public:
     Game() : window(sf::VideoMode(1440, 1024), "Fortune Cookie"), currentScreen(0) {
         screens[0] = new Start();
         screens[1] = new IngredientIntro();
+        screens[2] = new Order();
     }
 
     ~Game() {
@@ -225,7 +273,7 @@ public:
 private:
     sf::RenderWindow window;
     int currentScreen;
-    Screen* screens[2];
+    Screen* screens[3];
 };
 
 int main() {
