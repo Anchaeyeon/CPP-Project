@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 
+using namespace sf;
+
 // 기본 Screen 클래스 (가장 상위)
 class Screen {
 public:
@@ -8,16 +10,16 @@ public:
         font.loadFromFile("Pretendard-Bold.otf");
     }
 
-    virtual void click(sf::RenderWindow& window, int& currentScreen) = 0;
-    virtual void render(sf::RenderWindow& window) = 0;
+    virtual void click(RenderWindow& window, int& currentScreen) = 0;
+    virtual void render(RenderWindow& window) = 0;
     virtual ~Screen() = default;
 
 protected:
-    sf::Font font;
-    sf::Color Green, Yellow;
+    Font font;
+    Color Green, Yellow;
 };
 
-// 시작 클래스
+// 1. 시작 클래스
 class Start : public Screen {
 public:
     Start() {
@@ -41,15 +43,15 @@ public:
         startBtn.setPosition(645, 602);
     }
 
-    void click(sf::RenderWindow& window, int& currentScreen) override {
-        sf::Event event;
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+            if (event.type == Event::Closed) {
                 window.close();
             }
-            else if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            else if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Left) {
+                    Vector2i mousePos = Mouse::getPosition(window);
                     if (startBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
                         currentScreen = 1; // 화면 전환
                     }
@@ -58,7 +60,7 @@ public:
         }
     }
 
-    void render(sf::RenderWindow& window) override {
+    void render(RenderWindow& window) override {
         window.clear(Green);
         window.draw(startSprite);
         window.draw(titleText);
@@ -67,99 +69,67 @@ public:
     }
 
 private:
-    sf::Texture img;
-    sf::Sprite startSprite;
-    sf::Text titleText, startBtn;
+    Texture img;
+    Sprite startSprite;
+    Text titleText, startBtn;
 };
 
-// 재료 소개 클래스
+// 2. 재료 소개 클래스
 class IngredientIntro : public Screen {
 public:
     IngredientIntro() {
-        // 이미지
-        flourImg.loadFromFile("flour.png");
-        flourSprite.setTexture(flourImg);
-        flourSprite.setPosition(850, 310);
+        // 이미지 로드
+        imgarr[0].loadFromFile("flour.png");
+        imgarr[1].loadFromFile("milk.png");
+        imgarr[2].loadFromFile("egg.png");
+        imgarr[3].loadFromFile("butter.png");
+        imgarr[4].loadFromFile("sugar.png");
+        imgarr[5].loadFromFile("oil.png");
+        imgarr[6].loadFromFile("choco.png");
 
-        milkImg.loadFromFile("milk.png");
-        milkSprite.setTexture(milkImg);
-        milkSprite.setPosition(860, 400);
+        // 이미지 위치
+        sarr[0].setPosition(850, 310);
+        sarr[1].setPosition(860, 400);
+        sarr[2].setPosition(860, 470);
+        sarr[3].setPosition(850, 500);
+        sarr[4].setPosition(850, 600);
+        sarr[5].setPosition(860, 680);
+        sarr[6].setPosition(870, 750);
 
-        eggImg.loadFromFile("egg.png");
-        eggSprite.setTexture(eggImg);
-        eggSprite.setPosition(860, 470);
+        for (int i = 0; i < 7; i++) {
+            sarr[i].setTexture(imgarr[i]);
+        }
 
-        butterImg.loadFromFile("butter.png");
-        butterSprite.setTexture(butterImg);
-        butterSprite.setPosition(850, 500);
+        // 텍스트
+        txtarr[0].setString(L"< 재료 소개 Time >");
+        txtarr[0].setPosition(519, 173);
 
-        sugarImg.loadFromFile("sugar.png");
-        sugarSprite.setTexture(sugarImg);
-        sugarSprite.setPosition(850, 600);
+        txtarr[1].setString(L"박력분");
+        txtarr[1].setPosition(520, 324);
 
-        oilImg.loadFromFile("oil.png");
-        oilSprite.setTexture(oilImg);
-        oilSprite.setPosition(860, 680);
+        txtarr[2].setString(L"우유");
+        txtarr[2].setPosition(520, 396);
 
-        chocoImg.loadFromFile("choco.png");
-        chocoSprite.setTexture(chocoImg);
-        chocoSprite.setPosition(870, 750);
+        txtarr[3].setString(L"계란");
+        txtarr[3].setPosition(520, 468);
 
-        // "< 재료 소개 Time >" 텍스트
-        IngredientText.setFont(font);
-        IngredientText.setString(L"< 재료 소개 Time >");
-        IngredientText.setCharacterSize(50);
-        IngredientText.setFillColor(Yellow);
-        IngredientText.setPosition(519, 173);
+        txtarr[4].setString(L"버터");
+        txtarr[4].setPosition(520, 540);
 
-        // 박력분
-        flour.setFont(font);
-        flour.setString(L"박력분");
-        flour.setCharacterSize(50);
-        flour.setFillColor(Yellow);
-        flour.setPosition(542, 324);
+        txtarr[5].setString(L"슈가파우더");
+        txtarr[5].setPosition(520, 612);
 
-        // 우유
-        milk.setFont(font);
-        milk.setString(L"우유");
-        milk.setCharacterSize(50);
-        milk.setFillColor(Yellow);
-        milk.setPosition(542, 396);
+        txtarr[6].setString(L"바닐라오일");
+        txtarr[6].setPosition(520, 684);
 
-        // 계란
-        egg.setFont(font);
-        egg.setString(L"계란");
-        egg.setCharacterSize(50);
-        egg.setFillColor(Yellow);
-        egg.setPosition(542, 468);
+        txtarr[7].setString(L"초콜릿");
+        txtarr[7].setPosition(520, 750);
 
-        // 버터
-        butter.setFont(font);
-        butter.setString(L"버터");
-        butter.setCharacterSize(50);
-        butter.setFillColor(Yellow);
-        butter.setPosition(542, 540);
-
-        // 슈가파우더
-        sugar.setFont(font);
-        sugar.setString(L"슈가파우더");
-        sugar.setCharacterSize(50);
-        sugar.setFillColor(Yellow);
-        sugar.setPosition(542, 612);
-
-        // 바닐라오일
-        oil.setFont(font);
-        oil.setString(L"바닐라오일");
-        oil.setCharacterSize(50);
-        oil.setFillColor(Yellow);
-        oil.setPosition(542, 684);
-
-        // 초콜릿
-        choco.setFont(font);
-        choco.setString(L"초콜릿");
-        choco.setCharacterSize(50);
-        choco.setFillColor(Yellow);
-        choco.setPosition(542, 750);
+        for (int i = 0; i < 8; i++) {
+            txtarr[i].setFont(font);
+            txtarr[i].setCharacterSize(50);
+            txtarr[i].setFillColor(Yellow);
+        }
 
         // 다음으로 넘어가는 버튼
         nextBtn.setFont(font);
@@ -169,15 +139,15 @@ public:
         nextBtn.setPosition(1273, 870);
     }
 
-    void click(sf::RenderWindow& window, int& currentScreen) override {
-        sf::Event event;
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+            if (event.type == Event::Closed) {
                 window.close();
             }
-            else if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            else if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Left) {
+                    sf::Vector2i mousePos = Mouse::getPosition(window);
                     if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
                         currentScreen = 2; // 화면 전환
                     }
@@ -186,38 +156,27 @@ public:
         }
     }
 
-    void render(sf::RenderWindow& window) override {
+    void render(RenderWindow& window) override {
         window.clear(Green);
-        window.draw(IngredientText);
         window.draw(nextBtn);
 
-        window.draw(flour);
-        window.draw(milk);
-        window.draw(egg);
-        window.draw(butter);
-        window.draw(sugar);
-        window.draw(oil);
-        window.draw(choco);
+        for (int i = 0; i < 7; i++)
+            window.draw(sarr[i]);
 
-        window.draw(flourSprite);
-        window.draw(milkSprite);
-        window.draw(eggSprite);
-        window.draw(butterSprite);
-        window.draw(sugarSprite);
-        window.draw(oilSprite);
-        window.draw(chocoSprite);
+        for (int i = 0; i < 8; i++)
+            window.draw(txtarr[i]);
 
         window.display();
     }
 
 private:
-    sf::Text IngredientText, nextBtn;
-    sf::Text flour, milk, egg, butter, sugar, oil, choco;
-    sf::Texture flourImg, milkImg, eggImg, butterImg, sugarImg, oilImg, chocoImg;
-    sf::Sprite flourSprite, milkSprite, eggSprite, butterSprite, sugarSprite, oilSprite, chocoSprite;
+    Text IngredientText, nextBtn;
+    Text txtarr[8];
+    Sprite sarr[7];
+    Texture imgarr[7];
 };
 
-// 만들어야 할 순서를 보여주는 클래스
+// 3. 만들어야 할 순서를 보여주는 클래스
 class Order : public Screen {
 public:
     Order() {
@@ -229,29 +188,29 @@ public:
         orderList.setPosition(350, 159);
     }
 
-    void click(sf::RenderWindow& window, int& currentScreen) override {
-        sf::Event event;
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+            if (event.type == Event::Closed) {
                 window.close();
             }
         }
     }
 
-    void render(sf::RenderWindow& window) override {
+    void render(RenderWindow& window) override {
         window.clear(Green);
         window.draw(orderList);
         window.display();
     }
 
 private:
-    sf::Text orderList;
+    Text orderList;
 };
 
 // 메인 클래스
 class Game {
 public:
-    Game() : window(sf::VideoMode(1440, 1024), "Fortune Cookie"), currentScreen(0) {
+    Game() : window(VideoMode(1440, 1024), "Fortune Cookie"), currentScreen(0) {
         screens[0] = new Start();
         screens[1] = new IngredientIntro();
         screens[2] = new Order();
@@ -271,7 +230,7 @@ public:
     }
 
 private:
-    sf::RenderWindow window;
+    RenderWindow window;
     int currentScreen;
     Screen* screens[3];
 };

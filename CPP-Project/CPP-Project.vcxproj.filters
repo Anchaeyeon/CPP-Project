@@ -20,17 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Pretendard-Bold.otf">
-      <Filter>리소스 파일</Filter>
-    </Font>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\Users\user\Downloads\start_cookie.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="butter.png">
-      <Filter>리소스 파일</Filter>
-    </Image>
     <Image Include="choco.png">
       <Filter>리소스 파일</Filter>
     </Image>
@@ -46,8 +35,19 @@
     <Image Include="oil.png">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="start_cookie.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
     <Image Include="sugar.png">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="butter.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Pretendard-Bold.otf">
+      <Filter>리소스 파일</Filter>
+    </Font>
   </ItemGroup>
 </Project>
