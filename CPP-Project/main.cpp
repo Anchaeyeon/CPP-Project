@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
+#include <string>
 
 using namespace sf;
 
@@ -186,6 +188,31 @@ public:
         orderList.setCharacterSize(50);
         orderList.setFillColor(Yellow);
         orderList.setPosition(350, 159);
+
+        // 이미지 경로
+        std::vector<std::string> imagePaths = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
+
+        int startX = 300; // 시작 X 위치
+        int startY = 470; // 시작 Y 위치
+        int spacing = 150; // 간격
+
+        // 각 이미지 경로에 대해 개별 Texture를 생성
+        for (size_t i = 0; i < imagePaths.size(); ++i) {
+            Texture* texture = new Texture();
+            if (texture->loadFromFile(imagePaths[i])) {
+                Sprite sprite(*texture);
+                sprite.setPosition(startX + (i * spacing), startY); // 가로로 위치 조정
+                imageList.push_back(sprite);
+                textureList.push_back(texture); // Texture 리스트에 추가
+            }
+        }
+    }
+
+    ~Order() {
+        // 메모리 해제
+        for (auto texture : textureList) {
+            delete texture;
+        }
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -200,12 +227,22 @@ public:
     void render(RenderWindow& window) override {
         window.clear(Green);
         window.draw(orderList);
+
+        // 이미지 렌더링
+        for (const auto& sprite : imageList) {
+            window.draw(sprite);
+        }
+
         window.display();
     }
 
 private:
     Text orderList;
+    std::vector<Sprite> imageList;
+    std::vector<Texture*> textureList; // Texture 포인터 벡터
 };
+
+
 
 // 메인 클래스
 class Game {
