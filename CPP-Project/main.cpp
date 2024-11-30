@@ -170,6 +170,7 @@ private:
     Texture imgarr[6];
 };
 
+// 3. 만들어야 할 순서를 보여주는 클래스
 class Order : public Screen {
 public:
     Order() {
@@ -179,17 +180,17 @@ public:
         orderTxt.setFillColor(Yellow);
         orderTxt.setPosition(350, 159);
 
-        timeTxt.setFont(font);
-        timeTxt.setString(L"15초 안에 순서를 외워주세요!");
-        timeTxt.setCharacterSize(30);
-        timeTxt.setFillColor(Yellow);
-        timeTxt.setPosition(550, 240);
+        nextTxt.setFont(font);
+        nextTxt.setString(L"다 외운 후 next를 눌러주세요!");
+        nextTxt.setCharacterSize(30);
+        nextTxt.setFillColor(Yellow);
+        nextTxt.setPosition(550, 240);
 
-        // 몇 초 남았는지 알려주는 텍스트
-        timer.setFont(font);
-        timer.setCharacterSize(30);
-        timer.setFillColor(Yellow);
-        timer.setPosition(1200, 20);
+        nextBtn.setFont(font);
+        nextBtn.setString("next >");
+        nextBtn.setCharacterSize(43);
+        nextBtn.setFillColor(Yellow);
+        nextBtn.setPosition(1273, 870);
 
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
@@ -215,16 +216,16 @@ public:
         }
     }
 
+    // 섞인 이미지 순서를 반환
+    vector<string> getImageOrder() const {
+        return image; // 섞인 이미지 순서를 반환
+    }
+
     ~Order() {
         // 메모리 해제
         for (auto texture : tList) {
             delete texture;
         }
-    }
-
-    // 섞인 이미지 순서를 반환
-    vector<string> getImageOrder() const {
-        return image; // 섞인 이미지 순서를 반환
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -233,33 +234,21 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
-        }
-
-        // 타이머 초기화 (게임 시작 시점에서만 호출)
-        static bool timerStarted = false;
-        if (!timerStarted) {
-            clock.restart(); // 타이머를 새로 시작
-            timerStarted = true;
-        }
-
-        // 매 프레임마다 경과 시간 확인
-        float elapsedTime = clock.getElapsedTime().asSeconds();
-        if (elapsedTime > 15) {
-            currentScreen = 3; // 다음 화면으로 이동
+            else if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Left) {
+                    Vector2i mousePos = Mouse::getPosition(window);
+                    if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        currentScreen = 3; // 화면 전환
+                    }
+                }
+            }
         }
     }
 
     void render(RenderWindow& window) override {
         window.draw(orderTxt);
-        window.draw(timeTxt);
-
-        // 매 프레임마다 경과 시간 갱신
-        float elapsedTime = clock.getElapsedTime().asSeconds();
-        int remainingTime = max(0, 15 - static_cast<int>(elapsedTime));
-
-        // 타이머 계산 및 표시
-        timer.setString(L"남은 시간: " + to_string(remainingTime) + L"초");
-        window.draw(timer);
+        window.draw(nextTxt);
+        window.draw(nextBtn);
 
         // 이미지 렌더링
         for (const auto& sprite : imgList) {
@@ -270,11 +259,10 @@ public:
     }
 
 private:
-    Text orderTxt, timeTxt, timer;
+    Text orderTxt, nextTxt, nextBtn;
     vector<std::string> image;     // 이미지 경로를 저장할 벡터
     vector<Sprite> imgList;        // 스프라이트 벡터
     vector<Texture*> tList;        // Texture 포인터 벡터
-    Clock clock;                   // 시간 측정을 위한 SFML Clock
 };
 
 
@@ -379,11 +367,11 @@ public:
                 Vector2i mousePos = Mouse::getPosition(window);
                 for (size_t i = 0; i < imgList.size(); ++i) {
                     if (imgList[i].getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        // 클릭한 이미지의 인덱스를 clickedOrder에 추가
                         clickedOrder.push_back(i);
 
-                        // 클릭한 이미지 제거
+                        // 중복된 클릭 방지
                         imgList.erase(imgList.begin() + i);
-                        delete tList[i];
                         tList.erase(tList.begin() + i);
                         break;
                     }
@@ -393,19 +381,25 @@ public:
                 if (clickedOrder.size() == correctOrder.size()) {
                     bool isCorrect = true;
                     for (size_t j = 0; j < correctOrder.size(); ++j) {
-                        if (clickedOrder[j] != j) {
+                        // 클릭한 이미지의 인덱스를 이용하여 correctOrder에서 해당 이미지 경로 가져오기
+                        std::string clickedImagePath = correctOrder[clickedOrder[j]];
+
+                        // 클릭한 이미지 경로와 올바른 순서의 이미지 경로 비교
+                        if (clickedImagePath != correctOrder[j]) {
                             isCorrect = false;
                             break;
                         }
                     }
+
                     if (isCorrect) {
-                        currentScreen = 1; // 성공 화면으로 이동
+                        currentScreen = 5; // 성공 화면으로 이동
                     }
                     else {
-                        currentScreen = 2; // 실패 화면으로 이동
+                        currentScreen = 6; // 실패 화면으로 이동
                     }
                 }
             }
+
         }
 
         // 타이머 초기화: 게임이 시작될 때만 호출
@@ -417,8 +411,8 @@ public:
 
         // 타이머 초과 처리
         float elapsedTime = clock.getElapsedTime().asSeconds();
-        if (elapsedTime > 30) {
-            currentScreen = 2; // 실패 화면으로 이동
+        if (elapsedTime >= 30) {
+            currentScreen = 6; // 실패 화면으로 이동
         }
     }
 
@@ -448,7 +442,89 @@ private:
     Text timeTxt, timer;         // 텍스트 객체
 };
 
+// 6. 포춘쿠키 만들기 성공 클래스
+class Success : public Screen {
+public:
+    Success() {
+        // 이미지
+        img.loadFromFile("success_fortune.png");
+        startSprite.setTexture(img);
+        startSprite.setPosition(434, 200);
 
+        // "Fortune Cookie" 텍스트
+        successText.setFont(font);
+        successText.setString(L"포춘쿠키 만들기 성공!");
+        successText.setCharacterSize(50);
+        successText.setFillColor(Yellow);
+        successText.setPosition(484, 179);
+
+        // "시작하기" 텍스트
+        clickText.setFont(font);
+        clickText.setString(L"포춘쿠키를 클릭해주세요");
+        clickText.setCharacterSize(43);
+        clickText.setFillColor(Yellow);
+        clickText.setPosition(645, 602);
+    }
+
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+        }
+    }
+
+    void render(RenderWindow& window) override {
+        window.draw(startSprite);
+        window.draw(successText);
+        window.draw(clickText);
+        window.display();
+    }
+
+private:
+    Texture img;
+    Sprite startSprite;
+    Text successText, clickText;
+};
+
+// 7. 포춘쿠키 만들기 실패 클래스
+class Fail : public Screen {
+public:
+    Fail() {
+        // 이미지
+        img.loadFromFile("fail_fortune.png");
+        failSprite.setTexture(img);
+        failSprite.setPosition(434, 200);
+
+        // "Fortune Cookie" 텍스트
+        failText.setFont(font);
+        failText.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
+        failText.setCharacterSize(50);
+        failText.setFillColor(Yellow);
+        failText.setPosition(484, 179);
+    }
+
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+        }
+    }
+
+    void render(RenderWindow& window) override {
+        window.draw(failSprite);
+        window.draw(failText);
+        window.display();
+    }
+
+private:
+    Texture img;
+    Sprite failSprite;
+    Text failText;
+};
 
 // 메인 클래스
 class Game {
@@ -460,6 +536,8 @@ public:
         screens[3] = new Memory();
         vector<string> correctOrder = orderScreen.getImageOrder();
         screens[4] = new MakeInOrder(correctOrder);
+        screens[5] = new Success();
+        screens[6] = new Fail();
     }
 
     ~Game() {
@@ -480,7 +558,7 @@ private:
     RenderWindow window;
     Color Green;
     int currentScreen;
-    Screen* screens[5];
+    Screen* screens[7];
     Order orderScreen;
 };
 

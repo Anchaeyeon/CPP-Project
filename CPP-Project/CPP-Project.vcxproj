@@ -133,10 +133,12 @@
     <Image Include="butter.png" />
     <Image Include="choco.png" />
     <Image Include="egg.png" />
+    <Image Include="fail_fortune.png" />
     <Image Include="flour.png" />
     <Image Include="milk.png" />
     <Image Include="oil.png" />
     <Image Include="start_cookie.png" />
+    <Image Include="success_fortune.png" />
     <Image Include="sugar.png" />
   </ItemGroup>
   <ItemGroup>
