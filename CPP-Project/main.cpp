@@ -170,7 +170,6 @@ private:
     Texture imgarr[6];
 };
 
-// 3. 만들어야 할 순서를 보여주는 클래스
 class Order : public Screen {
 public:
     Order() {
@@ -190,7 +189,7 @@ public:
         timer.setFont(font);
         timer.setCharacterSize(30);
         timer.setFillColor(Yellow);
-        timer.setPosition(1150, 50);
+        timer.setPosition(1200, 20);
 
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
@@ -221,6 +220,11 @@ public:
         for (auto texture : tList) {
             delete texture;
         }
+    }
+
+    // 섞인 이미지 순서를 반환
+    vector<string> getImageOrder() const {
+        return image; // 섞인 이미지 순서를 반환
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -273,15 +277,16 @@ private:
     Clock clock;                   // 시간 측정을 위한 SFML Clock
 };
 
+
 // 4. 순서 기억 완료 문구 띄우는 클래스
 class Memory : public Screen {
 public:
     Memory() {
         mText.setFont(font);
-        mText.setString(L"                포춘쿠키 순서를 기억하셨나요?\n순서대로 쿠키를 움직여 포춘쿠키를 완성시켜주세요!");
+        mText.setString(L"                포춘쿠키 순서를 기억하셨나요?\n순서대로 재료를 클릭해 포춘쿠키를 완성시켜주세요!");
         mText.setCharacterSize(50);
         mText.setFillColor(Yellow);
-        mText.setPosition(250, 400);
+        mText.setPosition(230, 400);
 
         // 다음으로 넘어가는 버튼
         nextBtn.setFont(font);
@@ -301,7 +306,7 @@ public:
                 if (event.mouseButton.button == Mouse::Left) {
                     Vector2i mousePos = Mouse::getPosition(window);
                     if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                        currentScreen = 1; // 화면 전환
+                        currentScreen = 4; // 화면 전환
                     }
                 }
             }
@@ -321,6 +326,129 @@ private:
     Text mText, nextBtn;
 };
 
+// 5. 순서대로 포춘쿠키 만들기 클래스
+class MakeInOrder : public Screen {
+public:
+    MakeInOrder(const vector<string>& order) {
+        // 타이머 텍스트 설정
+        timeTxt.setFont(font);
+        timeTxt.setString(L"30초 안에 앞에서 기억한 재료 순서대로 클릭해주세요.");
+        timeTxt.setCharacterSize(50);
+        timeTxt.setFillColor(Yellow);
+        timeTxt.setPosition(195, 250);
+
+        // 타이머 텍스트 설정
+        timer.setFont(font);
+        timer.setCharacterSize(30);
+        timer.setFillColor(Yellow);
+        timer.setPosition(1200, 20);
+
+        correctOrder = order; // Order 클래스에서 받은 올바른 이미지 순서
+
+        int startX = 300; // 시작 X 위치
+        int startY = 470; // 시작 Y 위치
+        int spacing = 150; // 간격
+
+        // 섞인 이미지 경로에 대해 Texture와 Sprite 생성
+        for (size_t i = 0; i < correctOrder.size(); ++i) {
+            Texture* texture = new Texture();
+            if (texture->loadFromFile(correctOrder[i])) {
+                Sprite sprite(*texture);
+                sprite.setPosition(startX + (i * spacing), startY);
+                imgList.push_back(sprite);
+                tList.push_back(texture); // Texture 리스트에 추가
+            }
+        }
+    }
+
+    ~MakeInOrder() {
+        // 메모리 해제
+        for (auto texture : tList) {
+            delete texture;
+        }
+    }
+
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+
+            if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                Vector2i mousePos = Mouse::getPosition(window);
+                for (size_t i = 0; i < imgList.size(); ++i) {
+                    if (imgList[i].getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        clickedOrder.push_back(i);
+
+                        // 클릭한 이미지 제거
+                        imgList.erase(imgList.begin() + i);
+                        delete tList[i];
+                        tList.erase(tList.begin() + i);
+                        break;
+                    }
+                }
+
+                // 클릭 순서가 모두 맞추어진 경우 체크
+                if (clickedOrder.size() == correctOrder.size()) {
+                    bool isCorrect = true;
+                    for (size_t j = 0; j < correctOrder.size(); ++j) {
+                        if (clickedOrder[j] != j) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                    if (isCorrect) {
+                        currentScreen = 1; // 성공 화면으로 이동
+                    }
+                    else {
+                        currentScreen = 2; // 실패 화면으로 이동
+                    }
+                }
+            }
+        }
+
+        // 타이머 초기화: 게임이 시작될 때만 호출
+        static bool timerStarted = false;
+        if (!timerStarted) {
+            clock.restart(); // 타이머를 새로 시작
+            timerStarted = true;
+        }
+
+        // 타이머 초과 처리
+        float elapsedTime = clock.getElapsedTime().asSeconds();
+        if (elapsedTime > 30) {
+            currentScreen = 2; // 실패 화면으로 이동
+        }
+    }
+
+    void render(RenderWindow& window) override {
+        window.draw(timeTxt);
+
+        // 남은 시간 계산 및 표시
+        float elapsedTime = clock.getElapsedTime().asSeconds();
+        int remainingTime = max(0, 30 - static_cast<int>(elapsedTime));
+        timer.setString(L"남은 시간: " + std::to_wstring(remainingTime) + L"초");
+        window.draw(timer);
+
+        // 랜덤 위치에 배치된 이미지 그리기
+        for (const auto& sprite : imgList) {
+            window.draw(sprite);
+        }
+
+        window.display();
+    }
+
+private:
+    vector<string> correctOrder; // 올바른 이미지 순서
+    vector<int> clickedOrder;    // 사용자가 클릭한 순서
+    vector<Sprite> imgList;      // 이미지 스프라이트 리스트
+    vector<Texture*> tList;      // Texture 포인터 리스트
+    Clock clock;                 // 타이머
+    Text timeTxt, timer;         // 텍스트 객체
+};
+
+
 
 // 메인 클래스
 class Game {
@@ -330,6 +458,8 @@ public:
         screens[1] = new IngredientIntro();
         screens[2] = new Order();
         screens[3] = new Memory();
+        vector<string> correctOrder = orderScreen.getImageOrder();
+        screens[4] = new MakeInOrder(correctOrder);
     }
 
     ~Game() {
@@ -350,7 +480,8 @@ private:
     RenderWindow window;
     Color Green;
     int currentScreen;
-    Screen* screens[4];
+    Screen* screens[5];
+    Order orderScreen;
 };
 
 int main() {
