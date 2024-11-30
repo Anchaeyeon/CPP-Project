@@ -278,10 +278,10 @@ class Memory : public Screen {
 public:
     Memory() {
         mText.setFont(font);
-        mText.setString(L"포춘쿠키 순서를 기억하셨나요?\n순서대로 쿠키를 움직여 포춘쿠키를 완성시켜주세요!");
+        mText.setString(L"                포춘쿠키 순서를 기억하셨나요?\n순서대로 쿠키를 움직여 포춘쿠키를 완성시켜주세요!");
         mText.setCharacterSize(50);
         mText.setFillColor(Yellow);
-        mText.setPosition(250, 470);
+        mText.setPosition(250, 400);
 
         // 다음으로 넘어가는 버튼
         nextBtn.setFont(font);
