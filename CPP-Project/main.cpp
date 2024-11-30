@@ -11,7 +11,7 @@ using namespace std;
 // 기본 Screen 클래스 (가장 상위)
 class Screen {
 public:
-    Screen() : Green(0, 145, 50), Yellow(252, 171, 64) {
+    Screen() : Yellow(252, 171, 64) {
         font.loadFromFile("Pretendard-Bold.otf");
     }
 
@@ -21,7 +21,7 @@ public:
 
 protected:
     Font font;
-    Color Green, Yellow;
+    Color Yellow;
 };
 
 // 1. 시작 클래스
@@ -66,7 +66,6 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        window.clear(Green);
         window.draw(startSprite);
         window.draw(titleText);
         window.draw(startBtn);
@@ -157,21 +156,16 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        window.clear(Green);
         window.draw(nextBtn);
-
         for (int i = 0; i < 6; i++)
             window.draw(sarr[i]);
-
         for (int i = 0; i < 7; i++)
             window.draw(txtarr[i]);
-
         window.display();
     }
 
 private:
-    Text IngredientText, nextBtn;
-    Text txtarr[7];
+    Text nextBtn, txtarr[7];
     Sprite sarr[6];
     Texture imgarr[6];
 };
@@ -252,7 +246,6 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        window.clear(Green);
         window.draw(orderTxt);
         window.draw(timeTxt);
 
@@ -284,12 +277,11 @@ private:
 class Memory : public Screen {
 public:
     Memory() {
-        // "Fortune Cookie" 텍스트
-        titleText.setFont(font);
-        titleText.setString(L"포춘쿠키 순서를 기억하셨나요?\n순서대로 쿠키를 움직여 포춘쿠키를 완성시켜주세요!");
-        titleText.setCharacterSize(50);
-        titleText.setFillColor(Yellow);
-        titleText.setPosition(250, 470);
+        mText.setFont(font);
+        mText.setString(L"포춘쿠키 순서를 기억하셨나요?\n순서대로 쿠키를 움직여 포춘쿠키를 완성시켜주세요!");
+        mText.setCharacterSize(50);
+        mText.setFillColor(Yellow);
+        mText.setPosition(250, 470);
 
         // 다음으로 넘어가는 버튼
         nextBtn.setFont(font);
@@ -317,9 +309,8 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        window.clear(Green);
         window.draw(startSprite);
-        window.draw(titleText);
+        window.draw(mText);
         window.draw(nextBtn);
         window.display();
     }
@@ -327,14 +318,14 @@ public:
 private:
     Texture img;
     Sprite startSprite;
-    Text titleText, nextBtn;
+    Text mText, nextBtn;
 };
 
 
 // 메인 클래스
 class Game {
 public:
-    Game() : window(VideoMode(1440, 1024), "Fortune Cookie"), currentScreen(0) {
+    Game() : window(VideoMode(1440, 1024), "Fortune Cookie"), currentScreen(0), Green(0, 145, 50) {
         screens[0] = new Start();
         screens[1] = new IngredientIntro();
         screens[2] = new Order();
@@ -349,6 +340,7 @@ public:
 
     void run() {
         while (window.isOpen()) {
+            window.clear(Green);
             screens[currentScreen]->click(window, currentScreen);
             screens[currentScreen]->render(window);
         }
@@ -356,6 +348,7 @@ public:
 
 private:
     RenderWindow window;
+    Color Green;
     int currentScreen;
     Screen* screens[4];
 };
