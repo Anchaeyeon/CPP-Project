@@ -2,8 +2,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <random>
 
 using namespace sf;
+using namespace std;
 
 // 기본 Screen 클래스 (가장 상위)
 class Screen {
@@ -87,18 +90,16 @@ public:
         imgarr[3].loadFromFile("butter.png");
         imgarr[4].loadFromFile("sugar.png");
         imgarr[5].loadFromFile("oil.png");
-        imgarr[6].loadFromFile("choco.png");
 
         // 이미지 위치
         sarr[0].setPosition(850, 310);
         sarr[1].setPosition(860, 400);
         sarr[2].setPosition(860, 470);
-        sarr[3].setPosition(850, 500);
+        sarr[3].setPosition(850, 540);
         sarr[4].setPosition(850, 600);
         sarr[5].setPosition(860, 680);
-        sarr[6].setPosition(870, 750);
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
             sarr[i].setTexture(imgarr[i]);
         }
 
@@ -124,10 +125,7 @@ public:
         txtarr[6].setString(L"바닐라오일");
         txtarr[6].setPosition(520, 684);
 
-        txtarr[7].setString(L"초콜릿");
-        txtarr[7].setPosition(520, 750);
-
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 7; i++) {
             txtarr[i].setFont(font);
             txtarr[i].setCharacterSize(50);
             txtarr[i].setFillColor(Yellow);
@@ -162,10 +160,10 @@ public:
         window.clear(Green);
         window.draw(nextBtn);
 
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i < 6; i++)
             window.draw(sarr[i]);
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 7; i++)
             window.draw(txtarr[i]);
 
         window.display();
@@ -173,9 +171,9 @@ public:
 
 private:
     Text IngredientText, nextBtn;
-    Text txtarr[8];
-    Sprite sarr[7];
-    Texture imgarr[7];
+    Text txtarr[7];
+    Sprite sarr[6];
+    Texture imgarr[6];
 };
 
 // 3. 만들어야 할 순서를 보여주는 클래스
@@ -189,28 +187,36 @@ public:
         orderList.setFillColor(Yellow);
         orderList.setPosition(350, 159);
 
-        // 이미지 경로
-        std::vector<std::string> imagePaths = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
+        // 이미지 경로를 벡터에 저장
+        image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
+
+        // 랜덤하게 섞기
+        random_device rd;
+        mt19937 g(rd());
+        shuffle(image.begin(), image.end(), g);
 
         int startX = 300; // 시작 X 위치
         int startY = 470; // 시작 Y 위치
         int spacing = 150; // 간격
 
-        // 각 이미지 경로에 대해 개별 Texture를 생성
-        for (size_t i = 0; i < imagePaths.size(); ++i) {
+        // 섞인 이미지 경로에 대해 Texture와 Sprite 생성
+        for (size_t i = 0; i < image.size(); ++i) {
             Texture* texture = new Texture();
-            if (texture->loadFromFile(imagePaths[i])) {
+            if (texture->loadFromFile(image[i])) {
                 Sprite sprite(*texture);
                 sprite.setPosition(startX + (i * spacing), startY); // 가로로 위치 조정
-                imageList.push_back(sprite);
-                textureList.push_back(texture); // Texture 리스트에 추가
+                imgList.push_back(sprite);
+                tList.push_back(texture); // Texture 리스트에 추가
             }
         }
+
+        // 타이머 시작
+        clock.restart();
     }
 
     ~Order() {
         // 메모리 해제
-        for (auto texture : textureList) {
+        for (auto texture : tList) {
             delete texture;
         }
     }
@@ -221,6 +227,9 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
+            else if (clock.getElapsedTime().asSeconds() > 30) { // 30초 경과
+                currentScreen = 1; // 다음 화면으로 이동
+            }
         }
     }
 
@@ -229,7 +238,7 @@ public:
         window.draw(orderList);
 
         // 이미지 렌더링
-        for (const auto& sprite : imageList) {
+        for (const auto& sprite : imgList) {
             window.draw(sprite);
         }
 
@@ -238,10 +247,11 @@ public:
 
 private:
     Text orderList;
-    std::vector<Sprite> imageList;
-    std::vector<Texture*> textureList; // Texture 포인터 벡터
+    std::vector<std::string> image;     // 이미지 경로를 저장할 벡터
+    std::vector<Sprite> imgList;        // 스프라이트 벡터
+    std::vector<Texture*> tList;        // Texture 포인터 벡터
+    Clock clock;                        // 시간 측정을 위한 SFML Clock
 };
-
 
 
 // 메인 클래스
