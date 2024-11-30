@@ -180,12 +180,23 @@ private:
 class Order : public Screen {
 public:
     Order() {
-        // 순서 소개 텍스트
-        orderList.setFont(font);
-        orderList.setString(L"< 당신이 만들어야 할 포춘쿠키 순서 >");
-        orderList.setCharacterSize(50);
-        orderList.setFillColor(Yellow);
-        orderList.setPosition(350, 159);
+        orderTxt.setFont(font);
+        orderTxt.setString(L"< 당신이 만들어야 할 포춘쿠키 순서 >");
+        orderTxt.setCharacterSize(50);
+        orderTxt.setFillColor(Yellow);
+        orderTxt.setPosition(350, 159);
+
+        timeTxt.setFont(font);
+        timeTxt.setString(L"15초 안에 순서를 외워주세요!");
+        timeTxt.setCharacterSize(30);
+        timeTxt.setFillColor(Yellow);
+        timeTxt.setPosition(550, 240);
+
+        // 몇 초 남았는지 알려주는 텍스트
+        timer.setFont(font);
+        timer.setCharacterSize(30);
+        timer.setFillColor(Yellow);
+        timer.setPosition(1150, 50);
 
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
@@ -209,9 +220,6 @@ public:
                 tList.push_back(texture); // Texture 리스트에 추가
             }
         }
-
-        // 타이머 시작
-        clock.restart();
     }
 
     ~Order() {
@@ -227,15 +235,34 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
-            else if (clock.getElapsedTime().asSeconds() > 30) { // 30초 경과
-                currentScreen = 1; // 다음 화면으로 이동
-            }
+        }
+
+        // 타이머 초기화 (게임 시작 시점에서만 호출)
+        static bool timerStarted = false;
+        if (!timerStarted) {
+            clock.restart(); // 타이머를 새로 시작
+            timerStarted = true;
+        }
+
+        // 매 프레임마다 경과 시간 확인
+        float elapsedTime = clock.getElapsedTime().asSeconds();
+        if (elapsedTime > 15) {
+            currentScreen = 3; // 다음 화면으로 이동
         }
     }
 
     void render(RenderWindow& window) override {
         window.clear(Green);
-        window.draw(orderList);
+        window.draw(orderTxt);
+        window.draw(timeTxt);
+
+        // 매 프레임마다 경과 시간 갱신
+        float elapsedTime = clock.getElapsedTime().asSeconds();
+        int remainingTime = max(0, 15 - static_cast<int>(elapsedTime));
+
+        // 타이머 계산 및 표시
+        timer.setString(L"남은 시간: " + to_string(remainingTime) + L"초");
+        window.draw(timer);
 
         // 이미지 렌더링
         for (const auto& sprite : imgList) {
@@ -246,11 +273,61 @@ public:
     }
 
 private:
-    Text orderList;
-    std::vector<std::string> image;     // 이미지 경로를 저장할 벡터
-    std::vector<Sprite> imgList;        // 스프라이트 벡터
-    std::vector<Texture*> tList;        // Texture 포인터 벡터
-    Clock clock;                        // 시간 측정을 위한 SFML Clock
+    Text orderTxt, timeTxt, timer;
+    vector<std::string> image;     // 이미지 경로를 저장할 벡터
+    vector<Sprite> imgList;        // 스프라이트 벡터
+    vector<Texture*> tList;        // Texture 포인터 벡터
+    Clock clock;                   // 시간 측정을 위한 SFML Clock
+};
+
+// 4. 순서 기억 완료 문구 띄우는 클래스
+class Memory : public Screen {
+public:
+    Memory() {
+        // "Fortune Cookie" 텍스트
+        titleText.setFont(font);
+        titleText.setString(L"포춘쿠키 순서를 기억하셨나요?\n순서대로 쿠키를 움직여 포춘쿠키를 완성시켜주세요!");
+        titleText.setCharacterSize(50);
+        titleText.setFillColor(Yellow);
+        titleText.setPosition(250, 470);
+
+        // 다음으로 넘어가는 버튼
+        nextBtn.setFont(font);
+        nextBtn.setString("next >");
+        nextBtn.setCharacterSize(43);
+        nextBtn.setFillColor(Yellow);
+        nextBtn.setPosition(1273, 870);
+    }
+
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+            else if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Left) {
+                    Vector2i mousePos = Mouse::getPosition(window);
+                    if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        currentScreen = 1; // 화면 전환
+                    }
+                }
+            }
+        }
+    }
+
+    void render(RenderWindow& window) override {
+        window.clear(Green);
+        window.draw(startSprite);
+        window.draw(titleText);
+        window.draw(nextBtn);
+        window.display();
+    }
+
+private:
+    Texture img;
+    Sprite startSprite;
+    Text titleText, nextBtn;
 };
 
 
@@ -261,6 +338,7 @@ public:
         screens[0] = new Start();
         screens[1] = new IngredientIntro();
         screens[2] = new Order();
+        screens[3] = new Memory();
     }
 
     ~Game() {
@@ -279,7 +357,7 @@ public:
 private:
     RenderWindow window;
     int currentScreen;
-    Screen* screens[3];
+    Screen* screens[4];
 };
 
 int main() {
