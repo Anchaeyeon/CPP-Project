@@ -195,16 +195,11 @@ public:
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
 
-        // 랜덤하게 섞기
-        random_device rd;
-        mt19937 g(rd());
-        shuffle(image.begin(), image.end(), g);
-
         int startX = 300; // 시작 X 위치
         int startY = 470; // 시작 Y 위치
         int spacing = 150; // 간격
 
-        // 섞인 이미지 경로에 대해 Texture와 Sprite 생성
+        // 이미지 경로에 대해 Texture와 Sprite 생성
         for (size_t i = 0; i < image.size(); ++i) {
             Texture* texture = new Texture();
             if (texture->loadFromFile(image[i])) {
@@ -216,9 +211,9 @@ public:
         }
     }
 
-    // 섞인 이미지 순서를 반환
+    // 올바른 이미지 순서를 반환
     vector<string> getImageOrder() const {
-        return image; // 섞인 이미지 순서를 반환
+        return image; // 올바른 이미지 순서를 반환
     }
 
     ~Order() {
@@ -264,6 +259,7 @@ private:
     vector<Sprite> imgList;        // 스프라이트 벡터
     vector<Texture*> tList;        // Texture 포인터 벡터
 };
+
 
 
 // 4. 순서 기억 완료 문구 띄우는 클래스
@@ -318,6 +314,20 @@ private:
 class MakeInOrder : public Screen {
 public:
     MakeInOrder(const vector<string>& order) {
+        correctOrder = order; // Order 클래스에서 받은 올바른 이미지 순서
+
+        std::cout << "Correct order of images: ";
+        for (const auto& image : correctOrder) {
+            std::cout << image << " ";
+        }
+        std::cout << std::endl;
+
+        // 이미지 랜덤 섞기
+        random_device rd;
+        mt19937 g(rd());
+        shuffledOrder = correctOrder; // 섞기 전에 원래 순서 저장
+        shuffle(shuffledOrder.begin(), shuffledOrder.end(), g);
+
         // 타이머 텍스트 설정
         timeTxt.setFont(font);
         timeTxt.setString(L"30초 안에 앞에서 기억한 재료 순서대로 클릭해주세요.");
@@ -331,28 +341,19 @@ public:
         timer.setFillColor(Yellow);
         timer.setPosition(1200, 20);
 
-        correctOrder = order; // Order 클래스에서 받은 올바른 이미지 순서
-
         int startX = 300; // 시작 X 위치
         int startY = 470; // 시작 Y 위치
         int spacing = 150; // 간격
 
         // 섞인 이미지 경로에 대해 Texture와 Sprite 생성
-        for (size_t i = 0; i < correctOrder.size(); ++i) {
+        for (size_t i = 0; i < shuffledOrder.size(); ++i) {
             Texture* texture = new Texture();
-            if (texture->loadFromFile(correctOrder[i])) {
+            if (texture->loadFromFile(shuffledOrder[i])) {
                 Sprite sprite(*texture);
                 sprite.setPosition(startX + (i * spacing), startY);
                 imgList.push_back(sprite);
                 tList.push_back(texture); // Texture 리스트에 추가
             }
-        }
-    }
-
-    ~MakeInOrder() {
-        // 메모리 해제
-        for (auto texture : tList) {
-            delete texture;
         }
     }
 
@@ -367,31 +368,19 @@ public:
                 Vector2i mousePos = Mouse::getPosition(window);
                 for (size_t i = 0; i < imgList.size(); ++i) {
                     if (imgList[i].getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                        // 클릭한 이미지의 인덱스를 clickedOrder에 추가
-                        clickedOrder.push_back(i);
+                        // 클릭한 이미지의 경로를 clickedOrder에 추가
+                        clickedOrder.push_back(shuffledOrder[i]);
 
-                        // 중복된 클릭 방지
-                        imgList.erase(imgList.begin() + i);
-                        tList.erase(tList.begin() + i);
-                        break;
+                        // 디버그 출력: 클릭한 이미지 확인
+                        std::cout << "Clicked image: " << shuffledOrder[i] << std::endl;
+
+                        break; // 클릭한 이미지만 처리하고 반복문 종료
                     }
                 }
 
                 // 클릭 순서가 모두 맞추어진 경우 체크
-                if (clickedOrder.size() == correctOrder.size()) {
-                    bool isCorrect = true;
-                    for (size_t j = 0; j < correctOrder.size(); ++j) {
-                        // 클릭한 이미지의 인덱스를 이용하여 correctOrder에서 해당 이미지 경로 가져오기
-                        std::string clickedImagePath = correctOrder[clickedOrder[j]];
-
-                        // 클릭한 이미지 경로와 올바른 순서의 이미지 경로 비교
-                        if (clickedImagePath != correctOrder[j]) {
-                            isCorrect = false;
-                            break;
-                        }
-                    }
-
-                    if (isCorrect) {
+                if (clickedOrder.size() == shuffledOrder.size()) {
+                    if (clickedOrder == correctOrder) {
                         currentScreen = 5; // 성공 화면으로 이동
                     }
                     else {
@@ -399,7 +388,6 @@ public:
                     }
                 }
             }
-
         }
 
         // 타이머 초기화: 게임이 시작될 때만 호출
@@ -416,6 +404,7 @@ public:
         }
     }
 
+
     void render(RenderWindow& window) override {
         window.draw(timeTxt);
 
@@ -425,9 +414,12 @@ public:
         timer.setString(L"남은 시간: " + std::to_wstring(remainingTime) + L"초");
         window.draw(timer);
 
-        // 랜덤 위치에 배치된 이미지 그리기
-        for (const auto& sprite : imgList) {
-            window.draw(sprite);
+        // 랜덤 위치에 배치된 이미지 그리기 (클릭된 이미지는 제외)
+        for (size_t i = 0; i < imgList.size(); ++i) {
+            // 클릭된 이미지인지 확인
+            if (find(clickedOrder.begin(), clickedOrder.end(), shuffledOrder[i]) == clickedOrder.end()) {
+                window.draw(imgList[i]);
+            }
         }
 
         window.display();
@@ -435,12 +427,15 @@ public:
 
 private:
     vector<string> correctOrder; // 올바른 이미지 순서
-    vector<int> clickedOrder;    // 사용자가 클릭한 순서
+    vector<string> shuffledOrder; // 랜덤으로 섞인 이미지 순서
+    vector<string> clickedOrder; // 사용자가 클릭한 순서
     vector<Sprite> imgList;      // 이미지 스프라이트 리스트
     vector<Texture*> tList;      // Texture 포인터 리스트
     Clock clock;                 // 타이머
     Text timeTxt, timer;         // 텍스트 객체
 };
+
+
 
 // 6. 포춘쿠키 만들기 성공 클래스
 class Success : public Screen {
@@ -504,7 +499,7 @@ public:
                         crackStage++;
                     }
                     else if (crackStage == 3) {
-                        currentScreen = 1;
+                        currentScreen = 7;
                     }
                 }
             }
@@ -539,7 +534,7 @@ private:
     Sprite crackSprites[3];
     Vector2f crackedPositions[3];
     int crackStage;
-    
+
     Text successText, clickText, checkText; // 추가 텍스트
     bool checkVisible; // 새로운 문구 표시 여부
 };
@@ -557,6 +552,44 @@ public:
         // "Fortune Cookie" 텍스트
         failText.setFont(font);
         failText.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
+        failText.setCharacterSize(50);
+        failText.setFillColor(Yellow);
+        failText.setPosition(484, 179);
+    }
+
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+        }
+    }
+
+    void render(RenderWindow& window) override {
+        window.draw(failSprite);
+        window.draw(failText);
+        window.display();
+    }
+
+private:
+    Texture img;
+    Sprite failSprite;
+    Text failText;
+};
+
+// 8. 오늘의 운세를 알려주는 클래스
+class Fortune : public Screen {
+public:
+    Fortune() {
+        // 이미지
+        img.loadFromFile("fail_fortune.png");
+        failSprite.setTexture(img);
+        failSprite.setPosition(434, 200);
+
+        // "Fortune Cookie" 텍스트
+        failText.setFont(font);
+        failText.setString(L"오늘 나의 fortune은?");
         failText.setCharacterSize(50);
         failText.setFillColor(Yellow);
         failText.setPosition(484, 179);
@@ -611,6 +644,7 @@ public:
         screens[4] = new MakeInOrder(correctOrder);
         screens[5] = new Success();
         screens[6] = new Fail();
+        screens[7] = new Fortune();
     }
 
     ~Game() {
