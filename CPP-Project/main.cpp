@@ -501,6 +501,12 @@ public:
         checkVisible = false; // 초기에는 숨김 상태
 
         crackStage = 0; // 초기 단계
+        baseSpriteOriginalPos = baseSprite.getPosition(); // 원래 위치 저장
+
+        // 애니메이션 상태 초기화
+        isShaking = false;
+        shakeDuration = 0.2f; // 흔들림 지속 시간 (초)
+        shakeClock.restart(); // 타이머 초기화
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -518,6 +524,8 @@ public:
                     if (crackStage < 3) {
                         checkVisible = true;
                         crackStage++;
+                        isShaking = true; // 클릭 시 흔들림 활성화
+                        shakeClock.restart(); // 타이머 재시작
                     }
                     else if (crackStage == 3) {
                         currentScreen = 8;
@@ -528,6 +536,21 @@ public:
     }
 
     void render(RenderWindow& window) override {
+        // 흔들림 애니메이션 처리
+        if (isShaking) {
+            float elapsedTime = shakeClock.getElapsedTime().asSeconds();
+            if (elapsedTime < shakeDuration) {
+                // 흔들림 효과 적용
+                float offset = (elapsedTime / shakeDuration) * 10; // 최대 이동량 10
+                baseSprite.setPosition(baseSpriteOriginalPos.x + offset, baseSpriteOriginalPos.y);
+            }
+            else {
+                // 흔들림이 끝나면 원래 위치로 복귀
+                baseSprite.setPosition(baseSpriteOriginalPos);
+                isShaking = false; // 흔들림 비활성화
+            }
+        }
+
         // 기본 이미지 그리기
         window.draw(baseSprite);
 
@@ -556,9 +579,14 @@ private:
     Vector2f crackedPositions[3];
     int crackStage;
 
+    Vector2f baseSpriteOriginalPos; // 원래 위치 저장
     Text successText, clickText, checkText; // 추가 텍스트
     bool checkVisible; // 새로운 문구 표시 여부
+    bool isShaking; // 흔들림 상태 여부
+    Clock shakeClock; // 흔들림 타이머
+    float shakeDuration; // 흔들림 지속 시간
 };
+
 
 
 // 7. 포춘쿠키 만들기 실패 클래스 (순서가 맞지 않았을 때)
