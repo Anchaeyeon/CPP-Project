@@ -614,8 +614,6 @@ private:
     float shakeDuration; // 흔들림 지속 시간
 };
 
-
-
 // 7. 포춘쿠키 만들기 실패 클래스 (순서가 맞지 않았을 때)
 class OrderFail : public Screen {
 public:
@@ -636,6 +634,12 @@ public:
         failText2.setCharacterSize(30);
         failText2.setFillColor(Yellow);
         failText2.setPosition(600, 250);
+
+        exitButton.setFont(font);
+        exitButton.setString(L"종료하기");
+        exitButton.setCharacterSize(30);
+        exitButton.setFillColor(Yellow);
+        exitButton.setPosition(1273, 870);
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -645,12 +649,19 @@ public:
                 window.close();
             }
         }
+        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+            Vector2i mousePos = Mouse::getPosition(window);
+            if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                window.close(); // 창 닫기
+            }
+        }
     }
 
     void render(RenderWindow& window) override {
         window.draw(failSprite);
         window.draw(failText1);
         window.draw(failText2);
+        window.draw(exitButton);
         window.display();
     }
 
@@ -658,6 +669,7 @@ private:
     Texture img;
     Sprite failSprite;
     Text failText1, failText2;
+    Text exitButton;
 };
 
 // 8. 포춘쿠키 만들기 실패 클래스 (시간이 다 지났을 때)
@@ -680,6 +692,12 @@ public:
         failText2.setCharacterSize(30);
         failText2.setFillColor(Yellow);
         failText2.setPosition(600, 250);
+
+        exitButton.setFont(font);
+        exitButton.setString(L"종료하기");
+        exitButton.setCharacterSize(30);
+        exitButton.setFillColor(Yellow);
+        exitButton.setPosition(1273, 870);
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -689,12 +707,19 @@ public:
                 window.close();
             }
         }
+        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+            Vector2i mousePos = Mouse::getPosition(window);
+            if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                window.close(); // 창 닫기
+            }
+        }
     }
 
     void render(RenderWindow& window) override {
         window.draw(failSprite);
         window.draw(failText1);
         window.draw(failText2);
+        window.draw(exitButton);
         window.display();
     }
 
@@ -702,6 +727,7 @@ private:
     Texture img;
     Sprite failSprite;
     Text failText1, failText2;
+    Text exitButton;
 };
 
 // 9. 오늘의 운세를 알려주는 클래스
@@ -725,7 +751,7 @@ public:
         fText.setFont(font);
         fText.setString(L"오늘 나의 fortune은?");
         fText.setCharacterSize(50);
-        fText.setFillColor(Color::Yellow);
+        fText.setFillColor(Yellow);
         fText.setPosition(484, 179);
 
         // 랜덤 초기화
@@ -738,6 +764,12 @@ public:
         if (fortuneTexture.loadFromFile(lifeQuotes[randomIndex])) {
             fortuneSprite.setTexture(fortuneTexture);
         }
+
+        exitButtonText.setFont(font);
+        exitButtonText.setString(L"종료하기");
+        exitButtonText.setCharacterSize(30);
+        exitButtonText.setFillColor(Yellow);
+        exitButtonText.setPosition(1273, 870); // 버튼 안의 텍스트 위치 설정
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -745,6 +777,12 @@ public:
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed) {
                 window.close();
+            }
+        }
+        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+            Vector2i mousePos = Mouse::getPosition(window);
+            if (exitButtonText.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                window.close(); // 창 닫기
             }
         }
     }
@@ -759,6 +797,10 @@ public:
             window.draw(sarr[i]);
         }
         window.draw(fortuneSprite);  // 랜덤으로 선택된 이미지 그리기
+
+        // 종료 버튼 그리기
+        window.draw(exitButtonText);
+
         window.display();
     }
 
@@ -769,6 +811,9 @@ private:
     vector<string> lifeQuotes;
     Texture fortuneTexture;
     Sprite fortuneSprite;
+
+    // 종료 버튼
+    Text exitButtonText;
 };
 
 
