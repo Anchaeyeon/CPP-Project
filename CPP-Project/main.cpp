@@ -9,14 +9,14 @@
 using namespace sf;
 using namespace std;
 
-// 기본 Screen 클래스 (가장 상위)
+// Screen 클래스 (가장 상위)
 class Screen {
 public:
     Screen() : Yellow(252, 171, 64) {
         font.loadFromFile("Pretendard-Bold.otf");
     }
 
-    // 창 닫기 이벤트만 처리
+    // 창 닫기만 처리
     void CloseEvent(Event& event, RenderWindow& window) {
         if (event.type == Event::Closed) {
             window.close();
@@ -163,8 +163,10 @@ public:
 
     void render(RenderWindow& window) override {
         window.draw(nextBtn);
+        // 이미지를 화면에 그리기
         for (int i = 0; i < 6; i++)
             window.draw(sarr[i]);
+        // 텍스트를 화면에 그리기
         for (int i = 0; i < 7; i++)
             window.draw(txtarr[i]);
         window.display();
@@ -201,12 +203,13 @@ public:
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
 
-        // 섞은 이미지 저장
+        // 무작위로 순서 바꾸기
         random_device rd;
         mt19937 g(rd());
         shuffleImage = image;
         shuffle(shuffleImage.begin(), shuffleImage.end(), g);
 
+        // cmd에 출력
         std::cout << "섞은 이미지: ";
         for (const auto& image : shuffleImage) {
             std::cout << image << " ";
@@ -217,7 +220,7 @@ public:
         int startY = 470; // 시작 Y 위치
         int spacing = 150; // 간격
 
-        // 이미지 경로에 대해 Texture와 Sprite 생성
+        // 이미지 경로에 대해서 Texture와 Sprite 생성
         for (size_t i = 0; i < shuffleImage.size(); ++i) {
             Texture* texture = new Texture();
             if (texture->loadFromFile(shuffleImage[i])) {
@@ -255,16 +258,17 @@ public:
         }
 
         // 타이머 초과 처리
-        float timeOver = clock.getElapsedTime().asSeconds();
+        float timeOver = clock.getElapsedTime().asSeconds(); // 초 단위로 알 수 있게
         if (timeOver > 15) {
             currentScreen = 3;
         }
     }
 
     void render(RenderWindow& window) override {
-        // 남은 시간 계산 & 표시
+        // 남은 시간 계산
         float rTime = clock.getElapsedTime().asSeconds();
         int remainingTime = max(0, 15 - static_cast<int>(rTime));
+        // 남은 시간 표시
         timer.setString(L"남은 시간: " + to_wstring(remainingTime) + L"초");
         window.draw(timer);
 
@@ -338,16 +342,17 @@ private:
 class MakeInOrder : public Screen {
 public:
     MakeInOrder(const vector<string>& orderImg) {
-        correctOrder = orderImg; // Order 클래스에서 받은 올바른 이미지 순서
+        correctOrder = orderImg; // Order 클래스에서 받은 이미지 순서
 
+        // cmd에 출력
         std::cout << "받아온 이미지: ";
         for (const auto& image : correctOrder) {
             std::cout << image << " ";
         }
         std::cout << std::endl;
 
+        shuffleOrder = correctOrder;
         // 이미지 랜덤 섞기
-        shuffleOrder = correctOrder; // 원본 순서를 그대로 섞기 전의 순서로 저장
         random_device rd;
         mt19937 g(rd());
         shuffle(shuffleOrder.begin(), shuffleOrder.end(), g);
@@ -397,8 +402,10 @@ public:
                 Vector2i mousePos = Mouse::getPosition(window);
                 for (size_t i = 0; i < imgList.size(); ++i) {
                     if (imgList[i].getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        // 누른 사진을 clickOrder에 저장
                         clickOrder.push_back(shuffleOrder[i]);
 
+                        // 클릭한 이미지를 cmd에 출력
                         std::cout << "Clicked image: " << shuffleOrder[i] << std::endl;
 
                         break; // 클릭한 이미지만 처리하고 반복문 종료
@@ -408,15 +415,15 @@ public:
                 if (clickOrder.size() == shuffleOrder.size()) {
                     if (clickOrder == correctOrder) {
                         if (!win) {
-                            winSound.play(); // 성공 시 win.ogg 재생
-                            win = true; // 상태를 true로 설정
+                            winSound.play(); // 성공 했을 때 win.ogg 재생
+                            win = true;
                         }
                         currentScreen = 5; // 성공 화면으로 이동
                     }
                     else {
                         if (!lose) {
-                            loseSound.play(); // 실패 시 lose.ogg 재생
-                            lose = true; // 상태를 true로 설정
+                            loseSound.play(); // 실패했을 때 lose.ogg 재생
+                            lose = true;
                         }
                         currentScreen = 6; // 순서를 잘못 클릭한 실패 화면으로 이동
                     }
@@ -426,30 +433,31 @@ public:
 
         static bool timerStart = false;
         if (!timerStart) {
-            clock.restart(); // 타이머를 새로 시작
+            clock.restart(); // 타이머 새로 시작
             timerStart = true;
         }
 
         float timeOver = clock.getElapsedTime().asSeconds();
         if (timeOver >= 30) {
             if (!lose) {
-                loseSound.play(); // 시간 초과 시 lose.ogg 재생
-                lose = true; // 상태를 true로 설정
+                loseSound.play(); // 시간을 넘었을 때 lose.ogg 재생
+                lose = true;
             }
-            currentScreen = 7; // 시간이 모두 지나 실패한 화면으로 이동
+            currentScreen = 7; // 30초가 지나 실패한 화면으로 이동
         }
     }
 
     void render(RenderWindow& window) override {
         window.draw(timeTxt);
 
-        // 남은 시간 계산 및 표시
+        // 남은 시간 계산
         float rTime = clock.getElapsedTime().asSeconds();
         int remainingTime = max(0, 30 - static_cast<int>(rTime));
+        // 남은 시간 표시
         timer.setString(L"남은 시간: " + std::to_wstring(remainingTime) + L"초");
         window.draw(timer);
 
-        // 랜덤 위치에 배치된 이미지 그리기 (클릭된 이미지는 제외)
+        // 랜덤 위치에 배치된 이미지 그리기 (클릭된 이미지 제외)
         for (size_t i = 0; i < imgList.size(); ++i) {
             // 클릭된 이미지인지 확인
             if (find(clickOrder.begin(), clickOrder.end(), shuffleOrder[i]) == clickOrder.end()) {
@@ -483,16 +491,16 @@ private:
 class Success : public Screen {
 public:
     Success() {
-        // 기본 이미지 로드
         baseImg.loadFromFile("success_fortune.png");
         baseSprite.setTexture(baseImg);
         baseSprite.setPosition(434, 200);
 
-        // 금이 간 이미지 로드 및 초기화
+        // 금이 간 이미지
         crackImg[0].loadFromFile("crack1.png");
         crackImg[1].loadFromFile("crack2.png");
         crackImg[2].loadFromFile("crack3.png");
 
+        // 금이 간 이미지 위치
         crackPos[0] = Vector2f(690, 570);
         crackPos[1] = Vector2f(760, 560);
         crackPos[2] = Vector2f(800, 560);
@@ -521,13 +529,13 @@ public:
         checkText.setPosition(340, 179);
         checkVisible = false; // 초기에는 숨김 상태
 
-        crack = 0; // 초기 단계
+        crack = 0; // 처음
         basePos = baseSprite.getPosition(); // 원래 위치 저장
 
         // 애니메이션 상태 초기화
         isShaking = false;
-        shakeTime = 0.2f; // 흔들림 지속 시간
-        shakeClock.restart(); // 타이머 초기화
+        shakeTime = 0.2f; // 흔들리는 시간
+        shakeClock.restart(); // 타이머 처음으로
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -555,18 +563,17 @@ public:
     }
 
     void render(RenderWindow& window) override {
-        // 흔들림 애니메이션 처리
         if (isShaking) {
             float elapsedTime = shakeClock.getElapsedTime().asSeconds();
             if (elapsedTime < shakeTime) {
-                // 흔들림 효과 적용
-                float offset = (elapsedTime / shakeTime) * 10; // 최대 이동량 10
+                // 흔들림 효과
+                float offset = (elapsedTime / shakeTime) * 10; // 최대 이동: 10
                 baseSprite.setPosition(basePos.x + offset, basePos.y);
             }
             else {
-                // 흔들림이 끝나면 원래 위치로 복귀
+                // 흔들리는 게 끝나면 원래 위치로
                 baseSprite.setPosition(basePos);
-                isShaking = false; // 흔들림 비활성화
+                isShaking = false;
             }
         }
 
@@ -641,7 +648,7 @@ public:
             if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                 Vector2i mousePos = Mouse::getPosition(window);
                 if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                    window.close(); // 창 닫기
+                    window.close();
                 }
             }
         }
@@ -722,6 +729,7 @@ public:
         while (window.pollEvent(event)) {
             CloseEvent(event, window);
         }
+        // 종료하기 누르면 게임이 완전 닫히게
         if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
             Vector2i mousePos = Mouse::getPosition(window);
             if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -739,7 +747,7 @@ public:
         for (int i = 0; i < 3; i++) {
             window.draw(sarr[i]);
         }
-        window.draw(fSprite);  // 랜덤으로 선택된 이미지 그리기
+        window.draw(fSprite);  // 랜덤으로 선택된 명언 보여주기
 
         // 종료 버튼
         window.draw(exitButton);
