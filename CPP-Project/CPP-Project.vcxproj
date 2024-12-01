@@ -138,8 +138,11 @@
     <Image Include="egg.png" />
     <Image Include="fail_fortune.png" />
     <Image Include="flour.png" />
+    <Image Include="fortune_left.png" />
+    <Image Include="fortune_right.png" />
     <Image Include="milk.png" />
     <Image Include="oil.png" />
+    <Image Include="paper.png" />
     <Image Include="start_cookie.png" />
     <Image Include="success_fortune.png" />
     <Image Include="sugar.png" />

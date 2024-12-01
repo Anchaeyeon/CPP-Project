@@ -520,7 +520,7 @@ public:
                         crackStage++;
                     }
                     else if (crackStage == 3) {
-                        currentScreen = 7;
+                        currentScreen = 8;
                     }
                 }
             }
@@ -654,23 +654,24 @@ class Fortune : public Screen {
 public:
     Fortune() {
         // 이미지
-        img.loadFromFile("success_fortune.png");
-        failSprite.setTexture(img);
-        failSprite.setPosition(434, 200);
+        imgarr[0].loadFromFile("fortune_left.png");
+        imgarr[1].loadFromFile("fortune_right.png");
+        imgarr[2].loadFromFile("paper.png");
+        
+        // 이미지 위치
+        sarr[0].setPosition(110, 400);
+        sarr[1].setPosition(1098, 325);
+        sarr[2].setPosition(340, 450);
 
-        // "Fortune Cookie" 텍스트
-        failText.setFont(font);
-        failText.setString(L"오늘 나의 fortune은?");
-        failText.setCharacterSize(50);
-        failText.setFillColor(Yellow);
-        failText.setPosition(484, 179);
+        for (int i = 0; i < 3; i++) {
+            sarr[i].setTexture(imgarr[i]);
+        }
 
-        // 다음으로 넘어가는 버튼
-        nextBtn.setFont(font);
-        nextBtn.setString("next >");
-        nextBtn.setCharacterSize(43);
-        nextBtn.setFillColor(Yellow);
-        nextBtn.setPosition(1273, 870);
+        fText.setFont(font);
+        fText.setString(L"오늘 나의 fortune은?");
+        fText.setCharacterSize(50);
+        fText.setFillColor(Yellow);
+        fText.setPosition(484, 179);
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -679,28 +680,21 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
-            else if (event.type == Event::MouseButtonPressed) {
-                if (event.mouseButton.button == Mouse::Left) {
-                    Vector2i mousePos = Mouse::getPosition(window);
-                    if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                        currentScreen = 5; // 화면 전환
-                    }
-                }
-            }
         }
     }
 
     void render(RenderWindow& window) override {
-        window.draw(failSprite);
-        window.draw(failText);
-        window.draw(nextBtn);
+        window.draw(fText);
+        for (int i = 0; i < 3; i++) {
+            window.draw(sarr[i]);
+        }
         window.display();
     }
 
 private:
-    Texture img;
-    Sprite failSprite;
-    Text failText, nextBtn;
+    Texture imgarr[6];
+    Sprite sarr[6];
+    Text fText;
 };
 
 // 메인 클래스
