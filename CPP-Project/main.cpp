@@ -16,6 +16,13 @@ public:
         font.loadFromFile("Pretendard-Bold.otf");
     }
 
+    // 창 닫기 이벤트만 처리
+    void CloseEvent(Event& event, RenderWindow& window) {
+        if (event.type == Event::Closed) {
+            window.close();
+        }
+    }
+
     virtual void click(RenderWindow& window, int& currentScreen) = 0;
     virtual void render(RenderWindow& window) = 0;
     virtual ~Screen() = default;
@@ -52,10 +59,10 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
-            else if (event.type == Event::MouseButtonPressed) {
+            // 상위 클래스에서 상속받아 창 닫기 처리
+            CloseEvent(event, window);
+
+            if (event.type == Event::MouseButtonPressed) {
                 if (event.mouseButton.button == Mouse::Left) {
                     Vector2i mousePos = Mouse::getPosition(window);
                     if (startBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -142,10 +149,8 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
-            else if (event.type == Event::MouseButtonPressed) {
+            CloseEvent(event, window);
+            if (event.type == Event::MouseButtonPressed) {
                 if (event.mouseButton.button == Mouse::Left) {
                     sf::Vector2i mousePos = Mouse::getPosition(window);
                     if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -240,9 +245,7 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
+            CloseEvent(event, window);
         }
         // 타이머 초기화: 게임이 시작될 때만 호출
         static bool timerStarted = false;
@@ -305,10 +308,8 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
-            else if (event.type == Event::MouseButtonPressed) {
+            CloseEvent(event, window);
+            if (event.type == Event::MouseButtonPressed) {
                 if (event.mouseButton.button == Mouse::Left) {
                     Vector2i mousePos = Mouse::getPosition(window);
                     if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -395,9 +396,7 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
+            CloseEvent(event, window);
 
             if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                 Vector2i mousePos = Mouse::getPosition(window);
@@ -539,9 +538,7 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
+            CloseEvent(event, window);
 
             if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                 Vector2i pixelPos = Mouse::getPosition(window);
@@ -645,9 +642,7 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
+            CloseEvent(event, window);
             if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
                 Vector2i mousePos = Mouse::getPosition(window);
                 if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
@@ -730,9 +725,7 @@ public:
     void click(RenderWindow& window, int& currentScreen) override {
         Event event;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
+            CloseEvent(event, window);
         }
         if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
             Vector2i mousePos = Mouse::getPosition(window);
