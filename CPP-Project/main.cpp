@@ -468,14 +468,21 @@ public:
         successText.setFont(font);
         successText.setString(L"포춘쿠키 만들기 성공!");
         successText.setCharacterSize(50);
-        successText.setFillColor(Color::Yellow);
+        successText.setFillColor(Yellow);
         successText.setPosition(484, 179);
 
         clickText.setFont(font);
         clickText.setString(L"포춘쿠키를 클릭해주세요");
         clickText.setCharacterSize(30);
-        clickText.setFillColor(Color::Yellow);
+        clickText.setFillColor(Yellow);
         clickText.setPosition(550, 250);
+
+        checkText.setFont(font);
+        checkText.setString(L"드디어 나의 fortune을 확인해 볼 시간!");
+        checkText.setCharacterSize(50);
+        checkText.setFillColor(Yellow);
+        checkText.setPosition(340, 179);
+        checkVisible = false; // 초기에는 숨김 상태
 
         crackStage = 0; // 초기 단계
     }
@@ -493,6 +500,7 @@ public:
 
                 if (baseSprite.getGlobalBounds().contains(mousePos)) {
                     if (crackStage < 3) {
+                        checkVisible = true;
                         crackStage++;
                     }
                     else if (crackStage == 3) {
@@ -513,8 +521,13 @@ public:
         }
 
         // 텍스트 렌더링
-        window.draw(successText);
-        window.draw(clickText);
+        if (checkVisible) {
+            window.draw(checkText); // 새로운 문구 표시
+        }
+        else {
+            window.draw(successText); // 기존 문구 표시
+        }
+        window.draw(clickText); // 클릭 안내 문구
 
         window.display();
     }
@@ -526,7 +539,9 @@ private:
     Sprite crackSprites[3];
     Vector2f crackedPositions[3];
     int crackStage;
-    Text successText, clickText;
+    
+    Text successText, clickText, checkText; // 추가 텍스트
+    bool checkVisible; // 새로운 문구 표시 여부
 };
 
 
