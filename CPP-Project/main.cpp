@@ -180,17 +180,17 @@ public:
         orderTxt.setFillColor(Yellow);
         orderTxt.setPosition(350, 159);
 
-        nextTxt.setFont(font);
-        nextTxt.setString(L"다 외운 후 next를 눌러주세요!");
-        nextTxt.setCharacterSize(30);
-        nextTxt.setFillColor(Yellow);
-        nextTxt.setPosition(550, 240);
+        timeTxt.setFont(font);
+        timeTxt.setString(L"15초 동안 순서를 외워주세요!");
+        timeTxt.setCharacterSize(30);
+        timeTxt.setFillColor(Yellow);
+        timeTxt.setPosition(550, 240);
 
-        nextBtn.setFont(font);
-        nextBtn.setString("next >");
-        nextBtn.setCharacterSize(43);
-        nextBtn.setFillColor(Yellow);
-        nextBtn.setPosition(1273, 870);
+        // 타이머 텍스트 설정
+        timer.setFont(font);
+        timer.setCharacterSize(30);
+        timer.setFillColor(Yellow);
+        timer.setPosition(1200, 20);
 
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
@@ -242,21 +242,29 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
-            else if (event.type == Event::MouseButtonPressed) {
-                if (event.mouseButton.button == Mouse::Left) {
-                    Vector2i mousePos = Mouse::getPosition(window);
-                    if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                        currentScreen = 3; // 화면 전환
-                    }
-                }
-            }
+        }
+        // 타이머 초기화: 게임이 시작될 때만 호출
+        static bool timerStarted = false;
+        if (!timerStarted) {
+            clock.restart(); // 타이머를 새로 시작
+            timerStarted = true;
+        }
+
+        // 타이머 초과 처리
+        float elapsedTime = clock.getElapsedTime().asSeconds();
+        if (elapsedTime > 15) {
+            currentScreen = 3;
         }
     }
 
     void render(RenderWindow& window) override {
+        // 남은 시간 계산 및 표시
+        float elapsedTime = clock.getElapsedTime().asSeconds();
+        int remainingTime = max(0, 15 - static_cast<int>(elapsedTime));
+        timer.setString(L"남은 시간: " + to_wstring(remainingTime) + L"초");
+        window.draw(timer);
         window.draw(orderTxt);
-        window.draw(nextTxt);
-        window.draw(nextBtn);
+        window.draw(timeTxt);
 
         // 이미지 렌더링
         for (const auto& sprite : imgList) {
@@ -267,11 +275,12 @@ public:
     }
 
 private:
-    Text orderTxt, nextTxt, nextBtn;
+    Text orderTxt, timeTxt, timer;
     vector<string> image;               // 원본 이미지 경로
     vector<string> shuffledImage;       // 섞은 이미지 경로
     vector<Sprite> imgList;        // 스프라이트 벡터
     vector<Texture*> tList;        // Texture 포인터 벡터
+    Clock clock;                 // 타이머
 };
 
 
