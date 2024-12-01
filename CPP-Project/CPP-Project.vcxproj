@@ -169,6 +169,10 @@
   <ItemGroup>
     <Font Include="Pretendard-Bold.otf" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lose.ogg" />
+    <None Include="win.ogg" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

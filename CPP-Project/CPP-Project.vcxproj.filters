@@ -131,4 +131,12 @@
       <Filter>리소스 파일</Filter>
     </Font>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lose.ogg">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="win.ogg">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
 </Project>

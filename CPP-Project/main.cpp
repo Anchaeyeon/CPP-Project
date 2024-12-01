@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -221,7 +222,7 @@ public:
                 tList.push_back(texture); // Texture 리스트에 추가
             }
         }
-        
+
     }
 
     // 올바른 이미지 순서를 반환
@@ -282,8 +283,6 @@ private:
     vector<Texture*> tList;        // Texture 포인터 벡터
     Clock clock;                 // 타이머
 };
-
-
 
 // 4. 순서 기억 완료 문구 띄우는 클래스
 class Memory : public Screen {
@@ -349,7 +348,7 @@ public:
         shuffledOrder = correctOrder; // 원본 순서를 그대로 섞기 전의 순서로 저장
         random_device rd;
         mt19937 g(rd());
-        shuffle(shuffledOrder.begin(), shuffledOrder.end(), g); 
+        shuffle(shuffledOrder.begin(), shuffledOrder.end(), g);
 
         // 타이머 텍스트 설정
         timeTxt.setFont(font);
@@ -378,6 +377,19 @@ public:
                 tList.push_back(texture); // Texture 리스트에 추가
             }
         }
+        // 음악 파일 로드
+        if (!winBuffer.loadFromFile("win.ogg")) {
+            std::cerr << "Failed to load win.ogg" << std::endl;
+        }
+        if (!loseBuffer.loadFromFile("lose.ogg")) {
+            std::cerr << "Failed to load lose.ogg" << std::endl;
+        }
+        winSound.setBuffer(winBuffer);
+        loseSound.setBuffer(loseBuffer);
+
+        // 음악 상태 초기화
+        winSoundPlayed = false;
+        loseSoundPlayed = false;
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -391,42 +403,48 @@ public:
                 Vector2i mousePos = Mouse::getPosition(window);
                 for (size_t i = 0; i < imgList.size(); ++i) {
                     if (imgList[i].getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                        // 클릭한 이미지의 경로를 clickedOrder에 추가
                         clickedOrder.push_back(shuffledOrder[i]);
 
-                        // 디버그 출력: 클릭한 이미지 확인
                         std::cout << "Clicked image: " << shuffledOrder[i] << std::endl;
 
                         break; // 클릭한 이미지만 처리하고 반복문 종료
                     }
                 }
 
-                // 클릭 순서가 모두 맞추어진 경우 체크
                 if (clickedOrder.size() == shuffledOrder.size()) {
                     if (clickedOrder == correctOrder) {
+                        if (!winSoundPlayed) {
+                            winSound.play(); // 성공 시 win.ogg 재생
+                            winSoundPlayed = true; // 상태를 true로 설정
+                        }
                         currentScreen = 5; // 성공 화면으로 이동
                     }
                     else {
-                        currentScreen = 6; // 순서가 맞지 않은 실패 화면으로 이동
+                        if (!loseSoundPlayed) {
+                            loseSound.play(); // 실패 시 lose.ogg 재생
+                            loseSoundPlayed = true; // 상태를 true로 설정
+                        }
+                        currentScreen = 6; // 순서를 잘못 클릭한 실패 화면으로 이동
                     }
                 }
             }
         }
 
-        // 타이머 초기화: 게임이 시작될 때만 호출
         static bool timerStarted = false;
         if (!timerStarted) {
             clock.restart(); // 타이머를 새로 시작
             timerStarted = true;
         }
 
-        // 타이머 초과 처리
         float elapsedTime = clock.getElapsedTime().asSeconds();
         if (elapsedTime >= 30) {
+            if (!loseSoundPlayed) {
+                loseSound.play(); // 시간 초과 시 lose.ogg 재생
+                loseSoundPlayed = true; // 상태를 true로 설정
+            }
             currentScreen = 7; // 시간이 모두 지나 실패한 화면으로 이동
         }
     }
-
 
     void render(RenderWindow& window) override {
         window.draw(timeTxt);
@@ -456,6 +474,15 @@ private:
     vector<Texture*> tList;      // Texture 포인터 리스트
     Clock clock;                 // 타이머
     Text timeTxt, timer;         // 텍스트 객체
+
+    // 음악 관련 변수
+    SoundBuffer winBuffer;       // 성공 시 재생할 음악 버퍼
+    SoundBuffer loseBuffer;      // 실패 시 재생할 음악 버퍼
+    Sound winSound;              // 성공 시 재생할 음악
+    Sound loseSound;             // 실패 시 재생할 음악
+
+    bool winSoundPlayed;         // 성공 음악이 재생된 상태를 나타내는 변수
+    bool loseSoundPlayed;        // 실패 음악이 재생된 상태를 나타내는 변수
 };
 
 // 6. 포춘쿠키 만들기 성공 클래스
