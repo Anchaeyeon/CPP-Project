@@ -614,15 +614,15 @@ private:
     float shakeDuration; // 흔들림 지속 시간
 };
 
-// 7. 포춘쿠키 만들기 실패 클래스 (순서가 맞지 않았을 때)
-class OrderFail : public Screen {
+class FailScreen : public Screen {
 public:
-    OrderFail() {
-        // 이미지
+    FailScreen(const std::wstring& message) {
+        // 공통 이미지 설정
         img.loadFromFile("fail_fortune.png");
         failSprite.setTexture(img);
         failSprite.setPosition(434, 200);
 
+        // 공통 텍스트 설정
         failText1.setFont(font);
         failText1.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
         failText1.setCharacterSize(50);
@@ -630,7 +630,7 @@ public:
         failText1.setPosition(484, 179);
 
         failText2.setFont(font);
-        failText2.setString(L"순서가 맞지 않았어요");
+        failText2.setString(message);
         failText2.setCharacterSize(30);
         failText2.setFillColor(Yellow);
         failText2.setPosition(600, 250);
@@ -648,11 +648,11 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
-        }
-        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-            Vector2i mousePos = Mouse::getPosition(window);
-            if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                window.close(); // 창 닫기
+            if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                Vector2i mousePos = Mouse::getPosition(window);
+                if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                    window.close(); // 창 닫기
+                }
             }
         }
     }
@@ -665,70 +665,25 @@ public:
         window.display();
     }
 
-private:
+protected:
     Texture img;
     Sprite failSprite;
     Text failText1, failText2;
     Text exitButton;
 };
 
-// 8. 포춘쿠키 만들기 실패 클래스 (시간이 다 지났을 때)
-class TimeOverFail : public Screen {
+// 7. 순서가 맞지 않았을 때의 실패 클래스
+class OrderFail : public FailScreen {
 public:
-    TimeOverFail() {
-        // 이미지
-        img.loadFromFile("fail_fortune.png");
-        failSprite.setTexture(img);
-        failSprite.setPosition(434, 200);
-
-        failText1.setFont(font);
-        failText1.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
-        failText1.setCharacterSize(50);
-        failText1.setFillColor(Yellow);
-        failText1.setPosition(484, 179);
-
-        failText2.setFont(font);
-        failText2.setString(L"30초가 다 지났어요");
-        failText2.setCharacterSize(30);
-        failText2.setFillColor(Yellow);
-        failText2.setPosition(600, 250);
-
-        exitButton.setFont(font);
-        exitButton.setString(L"종료하기");
-        exitButton.setCharacterSize(30);
-        exitButton.setFillColor(Yellow);
-        exitButton.setPosition(1273, 870);
-    }
-
-    void click(RenderWindow& window, int& currentScreen) override {
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
-                window.close();
-            }
-        }
-        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-            Vector2i mousePos = Mouse::getPosition(window);
-            if (exitButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
-                window.close(); // 창 닫기
-            }
-        }
-    }
-
-    void render(RenderWindow& window) override {
-        window.draw(failSprite);
-        window.draw(failText1);
-        window.draw(failText2);
-        window.draw(exitButton);
-        window.display();
-    }
-
-private:
-    Texture img;
-    Sprite failSprite;
-    Text failText1, failText2;
-    Text exitButton;
+    OrderFail() : FailScreen(L"순서가 맞지 않았어요") {}
 };
+
+// 8. 30초가 다 지났을 때의 실패 클래스
+class TimeOverFail : public FailScreen {
+public:
+    TimeOverFail() : FailScreen(L"30초가 다 지났어요") {}
+};
+
 
 // 9. 오늘의 운세를 알려주는 클래스
 class Fortune : public Screen {
@@ -815,7 +770,6 @@ private:
     // 종료 버튼
     Text exitButtonText;
 };
-
 
 // 메인 클래스
 class Game {
