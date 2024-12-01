@@ -50,6 +50,15 @@
     <Image Include="success_fortune.png">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="crack2.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="crack1.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="crack3.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Pretendard-Bold.otf">

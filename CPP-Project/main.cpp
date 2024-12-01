@@ -446,24 +446,38 @@ private:
 class Success : public Screen {
 public:
     Success() {
-        // 이미지
-        img.loadFromFile("success_fortune.png");
-        startSprite.setTexture(img);
-        startSprite.setPosition(434, 200);
+        // 기본 이미지 로드
+        baseImg.loadFromFile("success_fortune.png");
+        baseSprite.setTexture(baseImg);
+        baseSprite.setPosition(434, 200);
 
-        // "Fortune Cookie" 텍스트
+        // 금이 간 이미지 로드 및 초기화
+        crackedImgs[0].loadFromFile("crack1.png");
+        crackedImgs[1].loadFromFile("crack2.png");
+        crackedImgs[2].loadFromFile("crack3.png");
+
+        crackedPositions[0] = Vector2f(690, 570);
+        crackedPositions[1] = Vector2f(760, 560);
+        crackedPositions[2] = Vector2f(800, 560);
+
+        for (int i = 0; i < 3; i++) {
+            crackSprites[i].setTexture(crackedImgs[i]);
+            crackSprites[i].setPosition(crackedPositions[i]);
+        }
+
         successText.setFont(font);
         successText.setString(L"포춘쿠키 만들기 성공!");
         successText.setCharacterSize(50);
-        successText.setFillColor(Yellow);
+        successText.setFillColor(Color::Yellow);
         successText.setPosition(484, 179);
 
-        // "시작하기" 텍스트
         clickText.setFont(font);
         clickText.setString(L"포춘쿠키를 클릭해주세요");
-        clickText.setCharacterSize(43);
-        clickText.setFillColor(Yellow);
-        clickText.setPosition(645, 602);
+        clickText.setCharacterSize(30);
+        clickText.setFillColor(Color::Yellow);
+        clickText.setPosition(550, 250);
+
+        crackStage = 0; // 초기 단계
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -472,21 +486,49 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
+
+            if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                Vector2i pixelPos = Mouse::getPosition(window);
+                Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
+                if (baseSprite.getGlobalBounds().contains(mousePos)) {
+                    if (crackStage < 3) {
+                        crackStage++;
+                    }
+                    else if (crackStage == 3) {
+                        currentScreen = 1;
+                    }
+                }
+            }
         }
     }
 
     void render(RenderWindow& window) override {
-        window.draw(startSprite);
+        // 기본 이미지 그리기
+        window.draw(baseSprite);
+
+        // 금이 간 이미지 단계별로 그리기
+        for (int i = 0; i < crackStage; i++) {
+            window.draw(crackSprites[i]);
+        }
+
+        // 텍스트 렌더링
         window.draw(successText);
         window.draw(clickText);
+
         window.display();
     }
 
 private:
-    Texture img;
-    Sprite startSprite;
+    Texture baseImg;
+    Texture crackedImgs[3];
+    Sprite baseSprite;
+    Sprite crackSprites[3];
+    Vector2f crackedPositions[3];
+    int crackStage;
     Text successText, clickText;
 };
+
 
 // 7. 포춘쿠키 만들기 실패 클래스
 class Fail : public Screen {
@@ -503,6 +545,13 @@ public:
         failText.setCharacterSize(50);
         failText.setFillColor(Yellow);
         failText.setPosition(484, 179);
+
+        // 다음으로 넘어가는 버튼
+        nextBtn.setFont(font);
+        nextBtn.setString("next >");
+        nextBtn.setCharacterSize(43);
+        nextBtn.setFillColor(Yellow);
+        nextBtn.setPosition(1273, 870);
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -511,19 +560,28 @@ public:
             if (event.type == Event::Closed) {
                 window.close();
             }
+            else if (event.type == Event::MouseButtonPressed) {
+                if (event.mouseButton.button == Mouse::Left) {
+                    Vector2i mousePos = Mouse::getPosition(window);
+                    if (nextBtn.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        currentScreen = 5; // 화면 전환
+                    }
+                }
+            }
         }
     }
 
     void render(RenderWindow& window) override {
         window.draw(failSprite);
         window.draw(failText);
+        window.draw(nextBtn);
         window.display();
     }
 
 private:
     Texture img;
     Sprite failSprite;
-    Text failText;
+    Text failText, nextBtn;
 };
 
 // 메인 클래스

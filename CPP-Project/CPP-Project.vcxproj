@@ -132,6 +132,9 @@
   <ItemGroup>
     <Image Include="butter.png" />
     <Image Include="choco.png" />
+    <Image Include="crack1.png" />
+    <Image Include="crack2.png" />
+    <Image Include="crack3.png" />
     <Image Include="egg.png" />
     <Image Include="fail_fortune.png" />
     <Image Include="flour.png" />
