@@ -407,7 +407,7 @@ public:
                         currentScreen = 5; // 성공 화면으로 이동
                     }
                     else {
-                        currentScreen = 6; // 실패 화면으로 이동
+                        currentScreen = 6; // 순서가 맞지 않은 실패 화면으로 이동
                     }
                 }
             }
@@ -423,7 +423,7 @@ public:
         // 타이머 초과 처리
         float elapsedTime = clock.getElapsedTime().asSeconds();
         if (elapsedTime >= 30) {
-            currentScreen = 6; // 실패 화면으로 이동
+            currentScreen = 7; // 시간이 모두 지나 실패한 화면으로 이동
         }
     }
 
@@ -457,8 +457,6 @@ private:
     Clock clock;                 // 타이머
     Text timeTxt, timer;         // 텍스트 객체
 };
-
-
 
 // 6. 포춘쿠키 만들기 성공 클래스
 class Success : public Screen {
@@ -563,21 +561,26 @@ private:
 };
 
 
-// 7. 포춘쿠키 만들기 실패 클래스
-class Fail : public Screen {
+// 7. 포춘쿠키 만들기 실패 클래스 (순서가 맞지 않았을 때)
+class OrderFail : public Screen {
 public:
-    Fail() {
+    OrderFail() {
         // 이미지
         img.loadFromFile("fail_fortune.png");
         failSprite.setTexture(img);
         failSprite.setPosition(434, 200);
 
-        // "Fortune Cookie" 텍스트
-        failText.setFont(font);
-        failText.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
-        failText.setCharacterSize(50);
-        failText.setFillColor(Yellow);
-        failText.setPosition(484, 179);
+        failText1.setFont(font);
+        failText1.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
+        failText1.setCharacterSize(50);
+        failText1.setFillColor(Yellow);
+        failText1.setPosition(484, 179);
+
+        failText2.setFont(font);
+        failText2.setString(L"순서가 맞지 않았어요");
+        failText2.setCharacterSize(30);
+        failText2.setFillColor(Yellow);
+        failText2.setPosition(600, 250);
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -591,22 +594,67 @@ public:
 
     void render(RenderWindow& window) override {
         window.draw(failSprite);
-        window.draw(failText);
+        window.draw(failText1);
+        window.draw(failText2);
         window.display();
     }
 
 private:
     Texture img;
     Sprite failSprite;
-    Text failText;
+    Text failText1, failText2;
 };
 
-// 8. 오늘의 운세를 알려주는 클래스
+// 8. 포춘쿠키 만들기 실패 클래스 (시간이 다 지났을 때)
+class TimeOverFail : public Screen {
+public:
+    TimeOverFail() {
+        // 이미지
+        img.loadFromFile("fail_fortune.png");
+        failSprite.setTexture(img);
+        failSprite.setPosition(434, 200);
+
+        failText1.setFont(font);
+        failText1.setString(L"포춘쿠키 만들기 실패 ㅠ.ㅠ");
+        failText1.setCharacterSize(50);
+        failText1.setFillColor(Yellow);
+        failText1.setPosition(484, 179);
+
+        failText2.setFont(font);
+        failText2.setString(L"30초가 다 지났어요");
+        failText2.setCharacterSize(30);
+        failText2.setFillColor(Yellow);
+        failText2.setPosition(600, 250);
+    }
+
+    void click(RenderWindow& window, int& currentScreen) override {
+        Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == Event::Closed) {
+                window.close();
+            }
+        }
+    }
+
+    void render(RenderWindow& window) override {
+        window.draw(failSprite);
+        window.draw(failText1);
+        window.draw(failText2);
+        window.display();
+    }
+
+private:
+    Texture img;
+    Sprite failSprite;
+    Text failText1, failText2;
+};
+
+// 9. 오늘의 운세를 알려주는 클래스
 class Fortune : public Screen {
 public:
     Fortune() {
         // 이미지
-        img.loadFromFile("fail_fortune.png");
+        img.loadFromFile("success_fortune.png");
         failSprite.setTexture(img);
         failSprite.setPosition(434, 200);
 
@@ -667,8 +715,9 @@ public:
         vector<string> correctOrder = orderScreen->getShuffledOrder(); // 원래 순서 가져오기
         screens[4] = new MakeInOrder(correctOrder);
         screens[5] = new Success();
-        screens[6] = new Fail();
-        screens[7] = new Fortune();
+        screens[6] = new OrderFail();
+        screens[7] = new TimeOverFail();
+        screens[8] = new Fortune();
     }
 
     ~Game() {
@@ -689,7 +738,7 @@ private:
     RenderWindow window;
     Color Green;
     int currentScreen;
-    Screen* screens[7];
+    Screen* screens[9];
     Order orderScreen;
 };
 
