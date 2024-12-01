@@ -195,25 +195,38 @@ public:
         // 이미지 경로를 벡터에 저장
         image = { "flour.png", "sugar.png", "milk.png", "egg.png", "oil.png", "butter.png" };
 
+        // 섞은 이미지 경로를 저장
+        random_device rd;
+        mt19937 g(rd());
+        shuffledImage = image;
+        shuffle(shuffledImage.begin(), shuffledImage.end(), g);
+
+        std::cout << "Correct order of images2: ";
+        for (const auto& image : shuffledImage) {
+            std::cout << image << " ";
+        }
+        std::cout << std::endl;
+
         int startX = 300; // 시작 X 위치
         int startY = 470; // 시작 Y 위치
         int spacing = 150; // 간격
 
         // 이미지 경로에 대해 Texture와 Sprite 생성
-        for (size_t i = 0; i < image.size(); ++i) {
+        for (size_t i = 0; i < shuffledImage.size(); ++i) {
             Texture* texture = new Texture();
-            if (texture->loadFromFile(image[i])) {
+            if (texture->loadFromFile(shuffledImage[i])) {
                 Sprite sprite(*texture);
                 sprite.setPosition(startX + (i * spacing), startY); // 가로로 위치 조정
                 imgList.push_back(sprite);
                 tList.push_back(texture); // Texture 리스트에 추가
             }
         }
+        
     }
 
     // 올바른 이미지 순서를 반환
-    vector<string> getImageOrder() const {
-        return image; // 올바른 이미지 순서를 반환
+    vector<string> getShuffledOrder() const {
+        return shuffledImage; // 섞인 순서를 반환
     }
 
     ~Order() {
@@ -255,7 +268,8 @@ public:
 
 private:
     Text orderTxt, nextTxt, nextBtn;
-    vector<std::string> image;     // 이미지 경로를 저장할 벡터
+    vector<string> image;               // 원본 이미지 경로
+    vector<string> shuffledImage;       // 섞은 이미지 경로
     vector<Sprite> imgList;        // 스프라이트 벡터
     vector<Texture*> tList;        // Texture 포인터 벡터
 };
@@ -323,10 +337,10 @@ public:
         std::cout << std::endl;
 
         // 이미지 랜덤 섞기
+        shuffledOrder = correctOrder; // 원본 순서를 그대로 섞기 전의 순서로 저장
         random_device rd;
         mt19937 g(rd());
-        shuffledOrder = correctOrder; // 섞기 전에 원래 순서 저장
-        shuffle(shuffledOrder.begin(), shuffledOrder.end(), g);
+        shuffle(shuffledOrder.begin(), shuffledOrder.end(), g); 
 
         // 타이머 텍스트 설정
         timeTxt.setFont(font);
@@ -640,7 +654,8 @@ public:
         screens[1] = new IngredientIntro();
         screens[2] = new Order();
         screens[3] = new Memory();
-        vector<string> correctOrder = orderScreen.getImageOrder();
+        Order* orderScreen = static_cast<Order*>(screens[2]);
+        vector<string> correctOrder = orderScreen->getShuffledOrder(); // 원래 순서 가져오기
         screens[4] = new MakeInOrder(correctOrder);
         screens[5] = new Success();
         screens[6] = new Fail();
