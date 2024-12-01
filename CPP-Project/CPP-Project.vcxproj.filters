@@ -68,6 +68,63 @@
     <Image Include="fortune_left.png">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="8.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="9.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="10.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="11.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="12.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="13.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="14.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="15.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="16.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="17.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="18.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="19.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="1.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="2.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="3.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="4.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="5.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="6.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="7.png">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Pretendard-Bold.otf">

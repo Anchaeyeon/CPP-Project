@@ -653,15 +653,15 @@ private:
 class Fortune : public Screen {
 public:
     Fortune() {
-        // 이미지
+        // 이미지 로드
         imgarr[0].loadFromFile("fortune_left.png");
         imgarr[1].loadFromFile("fortune_right.png");
         imgarr[2].loadFromFile("paper.png");
-        
-        // 이미지 위치
-        sarr[0].setPosition(110, 400);
-        sarr[1].setPosition(1098, 325);
-        sarr[2].setPosition(340, 450);
+
+        // 이미지 위치 설정
+        sarr[0].setPosition(110, 395);
+        sarr[1].setPosition(1098, 320);
+        sarr[2].setPosition(340, 445);
 
         for (int i = 0; i < 3; i++) {
             sarr[i].setTexture(imgarr[i]);
@@ -670,8 +670,19 @@ public:
         fText.setFont(font);
         fText.setString(L"오늘 나의 fortune은?");
         fText.setCharacterSize(50);
-        fText.setFillColor(Yellow);
+        fText.setFillColor(Color::Yellow);
         fText.setPosition(484, 179);
+
+        // 랜덤 초기화
+        srand(static_cast<unsigned int>(time(0)));
+
+        lifeQuotes = { "1.png", "2.png", "3.png", "4.png", "4.png", "6.png", "7.png", "8.png", "9.png", "10.png", "11.png", "12.png", "13.png", "14.png", "15.png", "16.png", "17.png", "18.png", "19.png" };
+
+        // 랜덤으로 이미지 선택
+        int randomIndex = rand() % lifeQuotes.size();
+        if (fortuneTexture.loadFromFile(lifeQuotes[randomIndex])) {
+            fortuneSprite.setTexture(fortuneTexture);
+        }
     }
 
     void click(RenderWindow& window, int& currentScreen) override {
@@ -684,10 +695,15 @@ public:
     }
 
     void render(RenderWindow& window) override {
+        // 이미지의 중심을 화면의 중심에 위치시키기 위해 좌표 계산
+        float centerX = (window.getSize().x - fortuneSprite.getGlobalBounds().width) / 2;
+        float centerY = (window.getSize().y - fortuneSprite.getGlobalBounds().height) / 2;
+        fortuneSprite.setPosition(centerX, centerY);
         window.draw(fText);
         for (int i = 0; i < 3; i++) {
             window.draw(sarr[i]);
         }
+        window.draw(fortuneSprite);  // 랜덤으로 선택된 이미지 그리기
         window.display();
     }
 
@@ -695,7 +711,11 @@ private:
     Texture imgarr[6];
     Sprite sarr[6];
     Text fText;
+    vector<string> lifeQuotes;
+    Texture fortuneTexture;
+    Sprite fortuneSprite;
 };
+
 
 // 메인 클래스
 class Game {
