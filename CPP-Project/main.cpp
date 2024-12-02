@@ -384,6 +384,14 @@ public:
                 tList.push_back(texture); // Texture 리스트에 추가
             }
         }
+
+        if (!winBuffer.loadFromFile("win.ogg")) {
+            cerr << "Failed to load win.ogg" << endl;
+        }
+        if (!loseBuffer.loadFromFile("lose.ogg")) {
+            cerr << "Failed to load lose.ogg" << endl;
+        }
+
         // 음악 파일 로드
         winSound.setBuffer(winBuffer);
         loseSound.setBuffer(loseBuffer);
